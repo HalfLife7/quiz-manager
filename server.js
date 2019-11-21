@@ -38,7 +38,8 @@ app.use(session({
   secure: true
 }))
 
-require("./routes/routes.js")(app);
+var routes = require("./routes/routes.js");
+app.use('/', routes);
 
 
 var server = app.listen(3000, function () {

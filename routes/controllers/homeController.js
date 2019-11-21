@@ -1,10 +1,10 @@
-var express = require('express')
+var express = require('express');
 var session = require('express-session')
 
-var app = express().router;
+var router = express.Router()
 
 // home page
-app.get('/', function (req, res) {
+router.get('/', function (req, res) {
   loginerror = req.session.login_error;
   req.session.login_error = "";
 
@@ -20,7 +20,7 @@ app.get('/', function (req, res) {
 });
 
 // home page
-app.get('homepage', function (req, res) {
+router.get('/homepage', function (req, res) {
     loginerror = req.session.login_error;
     req.session.login_error = "";
   
@@ -31,8 +31,8 @@ app.get('homepage', function (req, res) {
     // If a user IS logged in, we don't want them to be able to see the login
     // page (you can't be logged in 2x), so redirect them to the users page
     else {
-      res.render("/homepage");
+      res.render("../views/homepage");
     }
   });
 
-  module.exports = app;
+  module.exports = router;
