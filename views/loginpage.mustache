@@ -1,0 +1,20 @@
+{{>header}}
+<div>
+    <p>New to QuizManager?</p>
+    <p><a href="/register">SIGNUP</a></p>
+</div>
+
+<h1>Login</h1>
+<p>Welcome to QuizManager!</p>
+<p>Sign in below.</p>
+<form action="/attemptlogin" method="post">
+    <label for="email">Email:</label>
+    <input type="text" name="email"> <br />
+    <label for="password">Password:</label>
+    <input type="text" name="password" type="password"> <br />
+    <input type="submit" value="LOGIN"> <br />
+</form>
+
+{{ errormsg }}
+
+{{>footer}}
