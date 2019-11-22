@@ -4,6 +4,9 @@ var passwordHash = require('password-hash');
 
 var router = express.Router()
 
+
+
+
 // mysql
 var mysql = require('mysql');
 var connection = mysql.createConnection({
@@ -16,7 +19,6 @@ var connection = mysql.createConnection({
 router.post('/attemptlogin', function (req, res) {
   console.log(req.body);
 
-
   connection.query("SELECT * FROM user WHERE email = ?", req.body.email, function callback(error, results, fields) {
     if (error != null) {
       console.log(error);
@@ -24,36 +26,34 @@ router.post('/attemptlogin', function (req, res) {
       console.log(results[0]);
 
       if (results[0] == undefined) {
-        req.session.login_error = "Invalid email!";
+        req.session.loginError = "Invalid email!";
         res.redirect("/");
       }
       // check the email and password are valid before allowing the user
       // to view the users page. 
       else if (passwordHash.verify(req.body.password, results[0].password) == true) {
-        console.log("correct");
 
         // set an email session variable to indicate that a user is logged in
         req.session.email = req.body.email;
         req.session.userInfo =
           {
             email: results[0].email,
-            firstName: results[0].fullName,
-            lastName: results[0].lastName
+            firstName: results[0].first_name,
+            lastName: results[0].last_name
           }
 
         // check if the user account_type
         if (results[0].account_type == "administrator") {
-          req.session.account_type = "administrator";
+          req.session.accountType = "administrator";
           res.redirect("/homepage")
           // if user send to user panel
         } else if (results[0].account_type == "student") {
-          console.log("HERE");
-          req.session.account_type = "student";
+          req.session.accountType = "student";
           res.redirect("/homepage");
         }
         // if the input was not valid, re-render the login page with an error message
       } else {
-        req.session.login_error = "Invalid password!";
+        req.session.loginError = "Invalid password!";
         res.redirect("/");
       }
     }
@@ -62,10 +62,10 @@ router.post('/attemptlogin', function (req, res) {
 })
 
 router.get('/register', function (req, res) {
-  register_error = req.session.register_error;
-  req.session.register_error = "";
+  registerError = req.session.registerError;
+  req.session.registerError = "";
 
-  res.render("register", { errormsg: register_error });
+  res.render("register", { errorMessage: registerError });
 })
 
 router.post('/registeruser', function (req, res) {
@@ -75,13 +75,13 @@ router.post('/registeruser', function (req, res) {
   if (req.body.password == req.body.confirmPassword) {
     var hashedPassword = passwordHash.generate(req.body.password);
 
-    connection.query("INSERT into user (email, password, account_type, first_name, last_name, secret_question, secret_answer) VALUES (?,?,?,?,?,?,?)", [req.body.email, hashedPassword, "student", req.body.firstName, req.body.lastName, req.body.secretQuestion, req.body.secretAnswer], function callback(error, results, fields) {
+    connection.query("INSERT into user (email, password, account_type, first_name, last_name, secretQuestion, secretAnswer) VALUES (?,?,?,?,?,?,?)", [req.body.email, hashedPassword, "student", req.body.firstName, req.body.lastName, req.body.secretQuestion, req.body.secretAnswer], function callback(error, results, fields) {
       if (error != null) {
         console.log(error)
       } else {
 
         req.session.email = req.body.email;
-        req.session.account_type = "student";
+        req.session.accountType = "student";
 
         console.log(req.session);
 
@@ -90,29 +90,29 @@ router.post('/registeruser', function (req, res) {
       }
     })
   } else {
-    req.session.register_error = "Passwords do not match."
+    req.session.registerError = "Passwords do not match."
     // redirect to student homepage for logged-in students
     res.redirect("/register");
   }
 })
 
 router.get('/forgotpassword', function (req, res) {
-  forgot_password_error = req.session.forgot_password_error;
-  req.session.forgot_password_error = "";
-  res.render("forgotpasswordconfirmemail", { errormsg: forgot_password_error })
+  forgotPasswordError = req.session.forgotPasswordError;
+  req.session.forgotPasswordError = "";
+  res.render("forgotpasswordconfirmemail", { errorMessage: forgotPasswordError })
 });
 
 router.post('/forgotpasswordconfirmemail', function (req, res) {
   console.log(req.body);
 
-  connection.query("SELECT email, secret_question, secret_answer FROM user WHERE email = ?", req.body.email, function callback(error, results, fields) {
+  connection.query("SELECT email, secretQuestion, secretAnswer FROM user WHERE email = ?", req.body.email, function callback(error, results, fields) {
     if (error != null) {
       console.log(error);
     } else {
       console.log(results[0]);
 
       if (results[0] == undefined) {
-        req.session.forgot_password_error = "Invalid email!";
+        req.session.forgotPasswordError = "Invalid email!";
         res.redirect("/forgotpassword");
       }
       // check the email and password are valid before allowing the user
@@ -121,13 +121,13 @@ router.post('/forgotpasswordconfirmemail', function (req, res) {
         console.log("correct");
 
         // store secret question/answer in session and have user confirm in next page
-        req.session.forgot_password =
+        req.session.forgotPassword =
           {
             email: results[0].email,
-            secret_question: results[0].secret_question,
-            secret_answer: results[0].secret_answer
+            secretQuestion: results[0].secret_question,
+            secretAnswer: results[0].secret_answer
           }
-        console.log(req.session.forgot_password.secret_answer);
+        console.log(req.session.forgotPassword.secretAnswer);
         res.redirect('/secretanswer');
       }
     }
@@ -135,40 +135,40 @@ router.post('/forgotpasswordconfirmemail', function (req, res) {
 });
 
 router.get('/secretanswer', function (req, res) {
-  secret_answer_error = req.session.secret_answer_error;
-  req.session.secret_answer_error = "";
+  secretAnswerError = req.session.secretAnswerError;
+  req.session.secretAnswerError = "";
 
   // if user didnt enter an e-mail and shouldn't be here, redirect them back to the loginpage
-  if (req.session.forgot_password == null) {
+  if (req.session.forgotPassword == null) {
     res.redirect('/');
   } else {
-    res.render('forgotpasswordsecretquestion', { secret_question: req.session.forgot_password.secret_question, errormsg: secret_answer_error });
+    res.render('forgotpasswordsecretquestion', { secretQuestion: req.session.forgotPassword.secretQuestion, errorMessage: secretAnswerError });
   }
 })
 
 router.post('/forgotpasswordconfirmsecretanswer', function (req, res) {
   console.log(req.body);
   // if they enter the correct scret answer, send them to update their password
-  if (req.body.secret_answer == req.session.forgot_password.secret_answer) {
-    req.session.secret_answer_success = "success";
+  if (req.body.secretAnswer == req.session.forgotPassword.secretAnswer) {
+    req.session.secretAnswerSuccess = "success";
     res.redirect('/updatepassword')
   } else {
     // reload page with error saying incorrect secret answer
-    req.session.secret_answer_error = "Incorrect!";
+    req.session.secretAnswerError = "Incorrect!";
     res.redirect('/secretanswer');
   }
 })
 
 router.get('/updatepassword', function (req, res) {
   console.log(req.session);
-  update_password_error = req.session.update_password_error;
-  req.session.update_password_error = "";
+  updatePasswordError = req.session.updatePasswordError;
+  req.session.updatePasswordError = "";
 
   // if user didnt answer secret successfully, redirect them back to the loginpage
-  if (req.session.secret_answer_success == null) {
+  if (req.session.secretAnswerSuccess == null) {
     res.redirect('/');
   } else {
-    res.render('forgotpasswordupdatepassword', { errormsg: update_password_error, email: req.session.forgot_password.email });
+    res.render('forgotpasswordupdatepassword', { errorMessage: updatePasswordError, email: req.session.forgotPassword.email });
   }
 })
 
@@ -180,16 +180,16 @@ router.post('/forgotpasswordupdatepassword', function (req, res) {
   if (req.body.password == req.body.confirmPassword && req.body.password != "") {
     var hashedPassword = passwordHash.generate(req.body.password);
 
-    connection.query("UPDATE user SET password = (?) WHERE email = ?", [hashedPassword, req.session.forgot_password.email], function callback(error, results, fields) {
+    connection.query("UPDATE user SET password = (?) WHERE email = ?", [hashedPassword, req.session.forgotPassword.email], function callback(error, results, fields) {
       if (error != null) {
         console.log(error)
       } else {
 
-        req.session.email = req.session.forgot_password.email;
-        req.session.account_type = "student";
+        req.session.email = req.session.forgotPassword.email;
+        req.session.accountType = "student";
 
         // remove session variables related to forgot password
-        delete (req.session.forgot_password);
+        delete (req.session.forgotPassword);
 
         console.log(req.session);
 
@@ -198,11 +198,11 @@ router.post('/forgotpasswordupdatepassword', function (req, res) {
       }
     })
   } else if (req.body.password == "") {
-    req.session.update_password_error = "Password cannot be blank."
+    req.session.updatePasswordError = "Password cannot be blank."
     // redirect to student homepage for logged-in students
     res.redirect("/updatepassword");
   } else {
-    req.session.update_password_error = "Passwords do not match."
+    req.session.updatePasswordError = "Passwords do not match."
     // redirect to student homepage for logged-in students
     res.redirect("/updatepassword");
   }

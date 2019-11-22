@@ -24,11 +24,16 @@ app.use(express.urlencoded({
   extended: false
 }));
 
-const views_path = path.join(__dirname, '/views');
+// set image path
+app.use(express.static(__dirname + '/public'));
 
-app.engine('mustache', mustacheExpress(views_path + '/partials', '.mustache'));
+// set view paths
+const viewsPath = path.join(__dirname, '/views');
+const viewsPathAccountController = path.join(__dirname, '/views/accountController');
+
+app.engine('mustache', mustacheExpress(viewsPath + '/partials', '.mustache'));
 app.set('view engine', 'mustache');
-app.set('views', views_path);
+app.set('views', [viewsPath, viewsPathAccountController]);
 
 // start session
 app.use(session({
