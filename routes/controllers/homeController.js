@@ -37,6 +37,11 @@ router.get('/homepage', function (req, res) {
   loginError = req.session.loginError;
   req.session.loginError = "";
 
+  unauthorizedAccess = req.session.unauthorizedAccess;
+  req.session.unauthorizedAccess = "";
+
+  console.log("four");
+
   console.log(req.session);
   // if no user is logged in, display the login page, possibly with an error
   if (req.session.loggedIn != "true") {
@@ -45,7 +50,8 @@ router.get('/homepage', function (req, res) {
   // If a user IS logged in, we don't want them to be able to see the login
   // page (you can't be logged in 2x), so redirect them to the users page
   else {
-    res.render("../views/homepage", { firstName: req.session.userInfo.firstName, lastName: req.session.userInfo.lastName, accountType: req.session.userInfo.accountType });
+    console.log("five");
+    res.render("../views/homepage", { firstName: req.session.userInfo.firstName, lastName: req.session.userInfo.lastName, accountType: req.session.userInfo.accountType, unauthorizedAccessMessage: unauthorizedAccess });
   }
 });
 

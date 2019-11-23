@@ -60,6 +60,9 @@ router.post('/attemptlogin', function (req, res) {
         } else if (results[0].account_type == "student") {
           req.session.accountType = "student";
           res.redirect("/homepage");
+        } else if (results[0].account_type == "teacher") {
+          req.session.accountType = "teacher";
+          res.redirect("/homepage");
         }
         // if the input was not valid, re-render the login page with an error message
       } else {

@@ -1,18 +1,20 @@
 var express = require('express');
-var session = require('express-session')
 
 var router = express.Router()
 
 // middleware to redirect users to the homepage if they do not have valid session data
-function checkLogin(req, res) {
+function checkLogin(req, res, next) {
     if (!req.session.loggedIn) {
         req.session.loginError = "You need to be logged in!";
         res.redirect('/');
+    } else {
+        next();
     }
+
 }
 router.use(checkLogin);
 
-// middleware to pass accountType variable to res.render by default
+// middleware to pass accountType variable to res.render by default (for nav bar display purposes)
 function checkAccountType(req, res, next) {
     if (req.session.admin == "true") {
         res.locals.test = "true";
@@ -26,7 +28,6 @@ function checkAccountType(req, res, next) {
 
 router.use(checkAccountType);
 
-
 // mysql
 var mysql = require('mysql');
 var connection = mysql.createConnection({
@@ -37,6 +38,7 @@ var connection = mysql.createConnection({
 });
 
 router.get('/subjects', function (req, res) {
+    console.log("TEST");
     // get all subjects
     connection.query("SELECT * FROM subject", function callback(error, results, fields) {
         if (error != null) {

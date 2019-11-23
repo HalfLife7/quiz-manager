@@ -1,5 +1,14 @@
 {{>header}}
-{{>navigationbar}}
+{{#student}}
+{{>navigationbarstudent}}
+{{/student}}
+{{#teacher}}
+{{>navigationbarteacher}}
+{{/teacher}}
+{{#admin}}
+{{>navigationbaradmin}}
+{{/admin}}
+
 <h1 class="capitalize">{{subject}} Quizzes</h1>
 <table class="table table-hover">
         <thead>

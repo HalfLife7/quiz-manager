@@ -35,10 +35,11 @@ app.use(express.static(__dirname + '/public'));
 const viewsPath = path.join(__dirname, '/views');
 const viewsPathAccountController = path.join(__dirname, '/views/accountController');
 const viewsPathQuizController = path.join(__dirname, '/views/quizController');
+const viewsManageQuizController = path.join(__dirname, '/views/manageQuizController');
 
 app.engine('mustache', mustacheExpress(viewsPath + '/partials', '.mustache'));
 app.set('view engine', 'mustache');
-app.set('views', [viewsPath, viewsPathAccountController, viewsPathQuizController]);
+app.set('views', [viewsPath, viewsPathAccountController, viewsPathQuizController, viewsManageQuizController]);
 
 // start session
 app.use(session({
