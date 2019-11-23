@@ -5,16 +5,16 @@ var router = express.Router()
 // middleware to pass accountType variable to res.render by default
 function checkAccountType(req, res, next) {
   if (req.session.admin == "true") {
-    res.locals.test = "true";
+    res.locals.admin = "true";
   } else if (req.session.student == "true") {
-    res.locals.test = "true";
+    res.locals.student = "true";
   } else if (req.session.teacher == "true") {
-    res.locals.test = "true";
+    res.locals.teacher = "true";
   }
   next();
 };
 
-// router.use(checkAccountType);
+router.use(checkAccountType);
 
 // home page
 router.get('/', function (req, res) {

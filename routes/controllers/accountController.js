@@ -12,6 +12,12 @@ var connection = mysql.createConnection({
   database: 'quizmanager'
 });
 
+router.get('/logout', function (req, res) {
+  // clear session data and redirect them to the loginpage
+  req.session.destroy();
+  res.redirect('/');
+})
+
 router.post('/attemptlogin', function (req, res) {
   console.log(req.body);
 

@@ -1,0 +1,39 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <img class="img-thumbnail transparent" src="/images/logo.png" alt="logo" width="50" height="50">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="/homepage">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Leaderboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Manage Quizzes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Statistics</a>
+            </li>
+        </ul>
+        <div class="form-inline my-2 my-lg-0">
+            <div id="userName">{{firstName}} {{lastName}}</div>
+            <img src="images/defaultUserImage.png" alt="defaultUserImage" class="img-thumbnail" width="50" height="50">
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Settings
+                </button>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="#">User Profile</a>
+                    <a class="dropdown-item" href="#">User Settings</a>
+                    <a class="dropdown-item" href="/logout">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
