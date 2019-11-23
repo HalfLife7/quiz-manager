@@ -4,6 +4,10 @@ var path = require('path');
 var mustacheExpress = require('mustache-express');
 var app = express();
 
+// change all routes to lowercase (sometimes db params are uppercase)
+var lowercasePaths = require("express-lowercase-paths")
+app.use(lowercasePaths())
+
 // mysql
 var mysql = require('mysql');
 var connection = mysql.createConnection({
@@ -30,10 +34,11 @@ app.use(express.static(__dirname + '/public'));
 // set view paths
 const viewsPath = path.join(__dirname, '/views');
 const viewsPathAccountController = path.join(__dirname, '/views/accountController');
+const viewsPathQuizController = path.join(__dirname, '/views/quizController');
 
 app.engine('mustache', mustacheExpress(viewsPath + '/partials', '.mustache'));
 app.set('view engine', 'mustache');
-app.set('views', [viewsPath, viewsPathAccountController]);
+app.set('views', [viewsPath, viewsPathAccountController, viewsPathQuizController]);
 
 // start session
 app.use(session({

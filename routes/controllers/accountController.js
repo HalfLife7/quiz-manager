@@ -1,11 +1,7 @@
 var express = require('express');
-var session = require('express-session')
 var passwordHash = require('password-hash');
 
 var router = express.Router()
-
-
-
 
 // mysql
 var mysql = require('mysql');
@@ -33,13 +29,21 @@ router.post('/attemptlogin', function (req, res) {
       // to view the users page. 
       else if (passwordHash.verify(req.body.password, results[0].password) == true) {
 
-        // set an email session variable to indicate that a user is logged in
-        req.session.email = req.body.email;
+        if (results[0].account_type == "administrator") {
+          req.session.admin = "true";
+        } else if (results[0].account_type == "student") {
+          req.session.student = "true";
+        } else if (results[0].account_type == "teacher") {
+          req.session.teacher = "true";
+        }
+
+        req.session.loggedIn = "true";
         req.session.userInfo =
           {
             email: results[0].email,
             firstName: results[0].first_name,
-            lastName: results[0].last_name
+            lastName: results[0].last_name,
+            accountType: results[0].account_type
           }
 
         // check if the user account_type
@@ -75,13 +79,20 @@ router.post('/registeruser', function (req, res) {
   if (req.body.password == req.body.confirmPassword) {
     var hashedPassword = passwordHash.generate(req.body.password);
 
-    connection.query("INSERT into user (email, password, account_type, first_name, last_name, secretQuestion, secretAnswer) VALUES (?,?,?,?,?,?,?)", [req.body.email, hashedPassword, "student", req.body.firstName, req.body.lastName, req.body.secretQuestion, req.body.secretAnswer], function callback(error, results, fields) {
+    connection.query("INSERT into user (email, password, account_type, first_name, last_name, secret_question, secret_answer) VALUES (?,?,?,?,?,?,?)", [req.body.email, hashedPassword, "student", req.body.firstName, req.body.lastName, req.body.secretQuestion, req.body.secretAnswer], function callback(error, results, fields) {
       if (error != null) {
         console.log(error)
       } else {
 
-        req.session.email = req.body.email;
-        req.session.accountType = "student";
+        req.session.student = "true";
+        req.session.loggedIn = "true";
+        req.session.userInfo =
+          {
+            email: req.body.email,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            accountType: "student"
+          }
 
         console.log(req.session);
 
@@ -105,7 +116,7 @@ router.get('/forgotpassword', function (req, res) {
 router.post('/forgotpasswordconfirmemail', function (req, res) {
   console.log(req.body);
 
-  connection.query("SELECT email, secretQuestion, secretAnswer FROM user WHERE email = ?", req.body.email, function callback(error, results, fields) {
+  connection.query("SELECT email, secret_question, secret_answer FROM user WHERE email = ?", req.body.email, function callback(error, results, fields) {
     if (error != null) {
       console.log(error);
     } else {
@@ -126,6 +137,13 @@ router.post('/forgotpasswordconfirmemail', function (req, res) {
             email: results[0].email,
             secretQuestion: results[0].secret_question,
             secretAnswer: results[0].secret_answer
+          }
+
+        req.session.userInfo =
+          {
+            firstName: results[0].first_name,
+            lastName: results[0].last_name,
+            accountType: results[0].account_type
           }
         console.log(req.session.forgotPassword.secretAnswer);
         res.redirect('/secretanswer');
@@ -184,9 +202,15 @@ router.post('/forgotpasswordupdatepassword', function (req, res) {
       if (error != null) {
         console.log(error)
       } else {
-
-        req.session.email = req.session.forgotPassword.email;
-        req.session.accountType = "student";
+        if (req.session.userInfo.accountType == "administrator") {
+          req.session.admin = "true";
+        } else if (req.session.userInfo.accountType == "student") {
+          req.session.student = "true";
+        } else if (req.session.userInfo.accountType == "teacher") {
+          req.session.teacher = "true";
+        }
+        req.session.loggedIn = "true";
+        req.session.userInfo.email = req.session.forgotPassword.email;
 
         // remove session variables related to forgot password
         delete (req.session.forgotPassword);
