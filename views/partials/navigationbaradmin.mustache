@@ -7,25 +7,25 @@
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
+            <li class="nav-item {{homepageActive}}">
                 <a class="nav-link" href="/homepage">Home</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item {{leaderboardActive}}">
                 <a class="nav-link" href="#">Leaderboard</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/manage/quizzes">Manage Quizzes</a>
+                <a class="nav-link {{manageQuizzesActive}}" href="/manage/quizzes">Manage Quizzes</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Statistics</a>
+                <a class="nav-link {{statisticsActive}}" href="#">Statistics</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Admin Panel</a>
+                <a class="nav-link {{adminPanelActive}}" href="#">Admin Panel</a>
             </li>
         </ul>
         <div class="form-inline my-2 my-lg-0">
-            <div id="userName">{{firstName}} {{lastName}}</div>
-            <img src="images/defaultUserImage.png" alt="defaultUserImage" class="img-thumbnail" width="50" height="50">
+            <div id="userName">{{userInfo.firstName}} {{userInfo.lastName}}</div>
+            <img src="/images/defaultUserImage.png" alt="defaultUserImage" class="img-thumbnail" width="50" height="50">
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

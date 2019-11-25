@@ -1,0 +1,141 @@
+{{>header}}
+{{#student}}
+{{>navigationbarstudent}}
+{{/student}}
+{{#teacher}}
+{{>navigationbarteacher}}
+{{/teacher}}
+{{#admin}}
+{{>navigationbaradmin}}
+{{/admin}}
+
+<h1>Edit Quiz - {{quizData.name}}</h1>
+<h2>Quiz Details</h2>
+<a class="btn btn-secondary" href="/manage/quizzes" role="button">Back</a>
+<button class="btn btn-primary" type="submit" form="editQuizForm">Save Quiz</button>
+<form id="editQuizForm" method="post" action="/manage/quizzes/{{quizData.quiz_id}}/edit">
+    <input type="hidden" id="quizId" value="{{quizData.quiz_id}}">
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" class="form-control" name="name" id="name" placeholder="Quiz Name" value="{{quizData.name}}">
+    </div>
+    <div class="form-group">
+        <label for="subject">Subject</label>
+        <select class="form-control" name="subject" id="subject">
+            {{#subjectData}}
+            <option>{{name}}</option>
+            {{/subjectData}}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="class">Class</label>
+        <input type="text" class="form-control" name="class" id="class" placeholder="Class Name"
+            value="{{quizData.class}}">
+    </div>
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea class="form-control" name="description" id="description" rows="3">{{quizData.description}}</textarea>
+    </div>
+</form>
+<h2>Questions</h2>
+<a class="btn btn-primary" href="/manage/quizzes/{{quizData.quiz_id}}/question/create" role="button">Add Question</a>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Text</th>
+            <th scope="col">Type</th>
+            <th scope="col">Edit</th>
+            <th scope="col">Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#quizQuestionsData}}
+        <tr id="row-question-{{question_id}}">
+            <td>{{text}}</td>
+            <td>{{type}}</td>
+            <td><a class="btn btn-primary" href="/manage/quizzes/{{quiz_id}}/question/{{question_id}}"
+                    role="button">Edit</a></td>
+            <td><a class="btn btn-danger delete-button" id="delete-{{question_id}}" href="#" role="button">Delete</a>
+            </td>
+        </tr>
+        {{/quizQuestionsData}}
+    </tbody>
+</table>
+
+{{#notification}}
+<div id="notificationMessage" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{headerText}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>{{messageText}}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">{{buttonText}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{/notification}}
+
+{{>scripts}}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        // on click listener for delete button
+        $('.delete-button').click(function () {
+            var id = $(this).attr('id').split('-')[1];
+            var quizId = $("#quizId").val();
+            //console.log(id);
+            // show modal to confirm if they really do want to delete
+            bootbox.confirm("Are you sure you want to delete this question?", function (result) {
+                // if they confirm, redirect to route for deleting
+                if (result == true) {
+                    //console.log(result);
+                    // if they confirm, ajax request to delete the quiz
+                    $.ajax({
+                        url: '/manage/quizzes/' + quizId + '/question/' + id + '/delete',
+                        type: 'DELETE',
+                        success: function (result) {
+                            //console.log(result);
+                            // if delete is successful
+                            if (result == "success") {
+                                // if successful, delete the row from the table
+                                $("#row-question-" + id).remove();
+                                // show modal saying successfully deleted
+                                bootbox.dialog({
+                                    title: "Delete Question",
+                                    message: "Successfully deleted question.",
+                                    backdrop: true,
+                                    onEscape:true,
+                                    buttons: {
+                                        okay: {
+                                            label: 'Okay',
+                                            className: 'btn-success'
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    })
+                }
+
+            })
+        })
+    });
+</script>
+
+<script defer="defer">
+    $(window).on('load', function () {
+        if (document.body.contains(document.getElementById("notificationMessage")) == true) {
+            $("#notificationMessage").modal('show');
+        }
+    });
+</script>
+
+{{>footer}}

@@ -138,7 +138,6 @@ router.post('/forgotpasswordconfirmemail', function (req, res) {
       // check the email and password are valid before allowing the user
       // to view the users page. 
       else {
-        console.log("correct");
 
         // store secret question/answer in session and have user confirm in next page
         req.session.forgotPassword =

@@ -1,0 +1,29 @@
+{{>header}}
+{{#student}}
+{{>navigationbarstudent}}
+{{/student}}
+{{#teacher}}
+{{>navigationbarteacher}}
+{{/teacher}}
+{{#admin}}
+{{>navigationbaradmin}}
+{{/admin}}
+
+<h1>Subjects</h1>
+
+<table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">Subject</th>
+          </tr>
+        </thead>
+        <tbody>
+            {{#subjectData}}
+          <tr>
+            <td><a class="capitalize" href="subjects/{{name}}">{{name}}</a></td>
+          </tr>
+          {{/subjectData}}
+        </tbody>
+      </table>
+      {{>scripts}}
+{{>footer}}

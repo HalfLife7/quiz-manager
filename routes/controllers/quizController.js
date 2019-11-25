@@ -8,6 +8,9 @@ function checkLogin(req, res, next) {
         req.session.loginError = "You need to be logged in!";
         res.redirect('/');
     } else {
+        res.locals.userInfo = req.session.userInfo;
+        res.locals.homepageActive = "inactive";
+        res.locals.quizzesActive = "active";
         next();
     }
 
@@ -38,7 +41,6 @@ var connection = mysql.createConnection({
 });
 
 router.get('/subjects', function (req, res) {
-    console.log("TEST");
     // get all subjects
     connection.query("SELECT * FROM subject", function callback(error, results, fields) {
         if (error != null) {
@@ -46,7 +48,7 @@ router.get('/subjects', function (req, res) {
         } else {
             var subjects = results
 
-            res.render('subjects', { subjectData: subjects, firstName: req.session.userInfo.firstName, lastName: req.session.userInfo.lastName })
+            res.render('subjects', { subjectData: subjects })
         }
     });
 })
@@ -62,7 +64,7 @@ router.get('/subjects/:subject', function (req, res) {
             console.log(results);
             var quizzes = results
 
-            res.render('allquizzesonesubject', { allQuizzes: quizzes, subject: subject, firstName: req.session.userInfo.firstName, lastName: req.session.userInfo.lastName })
+            res.render('allquizzesonesubject', { allQuizzes: quizzes, subject: subject})
         }
     });
 })
@@ -78,10 +80,11 @@ router.get('/subjects/:subject/add', function (req, res) {
             console.log(results);
             var quizzes = results
 
-            res.render('allquizzesonesubject', { allQuizzes: quizzes, subject: subject, firstName: req.session.userInfo.firstName, lastName: req.session.userInfo.lastName })
+            res.render('allquizzesonesubject', { allQuizzes: quizzes, subject: subject})
         }
     });
 })
+
 
 
 module.exports = router;

@@ -9,35 +9,55 @@
 {{>navigationbaradmin}}
 {{/admin}}
 
-<p>Welcome to QuizManager!</p>
-
-{{#unauthorizedAccessMessage}}
-<div id="errorMessage" class="modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Warning</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+<h1>Edit Question</h1>
+<h2>Question Details</h2>
+<a class="btn btn-secondary" href="/manage/quizzes/{{questionData.quiz_id}}" role="button">Back</a>
+<button class="btn btn-primary" type="submit" form="editQuestionForm">Save Question</button>
+<form id="editQuestionForm" method="post"
+    action="/manage/quizzes/{{questionData.quiz_id}}/question/{{questionData.question_id}}/edit">
+    <!-- <div class="form-group">
+        <label for="questionType">Type</label>
+        <select readonly name="questionType" class="form-control" id="questionType">
+            <option {{multipleChoice}}>Multiple Choice</option>
+            <option {{trueFalse}}>True / False</option>
+        </select> -->
+    </div>
+    <div class="form-group">
+        <label for="questionType">Type</label>
+        <input type="text" readonly class="form-control" name="questionType" id="questionType"
+            placeholder="Question Type" value="{{questionData.type}}">
+    </div>
+    <div class="form-group">
+        <label for="questionText">Question Text</label>
+        <textarea class="form-control" name="questionText" id="questionText" rows="3">{{questionData.text}}</textarea>
+    </div>
+    <h2>Answers</h2>
+    <div id="answers">
+        {{#questionAnswersData}}
+        <div class="form-row">
+            <div class="form-group col-md-9 form-group">
+                <input type="hidden" name="answerId{{questionNumber}}" value="{{questionAnswersData.question_answer_id}}">
+                <label class="sr-only" for="answerText{{questionNumber}}">answer_text</label>
+                <input type="text" name="answerText{{questionNumber}}" class="form-control"
+                    id="answerText{{questionNumber}}" value="{{answer_text}}"
+                    placeholder="Answer {{questionNumber}} Text">
             </div>
-            <div class="modal-body">
-                <p>{{unauthorizedAccessMessage}}</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <div class="custom-control custom-radio form-group">
+                <input value="isCorrect{{questionNumber}}" type="radio" id="isCorrect{{questionNumber}}"
+                    name="isCorrect" class="custom-control-input {{is_correct}}">
+                <label class="custom-control-label" for="isCorrect{{questionNumber}}">Correct?</label>
             </div>
         </div>
+        {{/questionAnswersData}}
     </div>
-</div>
-{{/unauthorizedAccessMessage}}
+</form>
 
-<script>
-    $(window).on('load', function () {
-        if (document.body.contains(document.getElementById("errorMessage")) == true) {
-            $("#errorMessage").modal('show');
-        }
-    }
+{{>scripts}}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.correct').prop("checked", true);
+    });
 
 </script>
 
