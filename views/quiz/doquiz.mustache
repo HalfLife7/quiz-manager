@@ -9,11 +9,14 @@
 {{>navigationbaradmin}}
 {{/admin}}
 
-<h1>Quiz Attempt - {{quizData.name}}</h1>
+<main class="container" role="main">
+<h1 class="mt-5 pt-5">Quiz - {{quizData.name}}</h1>
 <h2 id="subTitle">Quiz Details</h2>
+<button class="btn btn-primary" id="checkSubmissionButton" form="quizAttemptForm">Check Submission</button>
 <button class="btn btn-primary" id="submitButton">Submit Quiz</button>
-<form style="width: 50%; margin: auto;" id="editQuizForm" method="post"
-    action="/subjects/quizzes/{{quizData.quiz_id}}/test/submitquiz">
+<form id="quizAttemptForm" method="post"
+    action="javascript:void(0);">
+    <input type="hidden" name="quizId" id="quizId" value="{{quizData.quiz_id}}">
     <input type="hidden" name="userId" id="userId" value="{{userInfo.userId}}">
     <div class="form-group">
         <label for="name">Name</label>
@@ -65,6 +68,8 @@
     </div>
 </div>
 {{/notification}}
+</main>
+
 
 {{>scripts}}
 
@@ -109,21 +114,21 @@
         $('#submitButton').click(function () {
             // show modal to confirm if they really do want to delete
             bootbox.confirm("Are you sure you want to submit your quiz?", function (result) {
-                // if they confirm, redirect to route for deleting
                 if (result == true) {
                     //console.log(result);
-                    // if they confirm, ajax request to delete the quiz
-                    //$('#editQuizForm').submit();
+                    // if they confirm, ajax request to hide the submit button to prevent multiple submissions
+                    $('#submitButton').hide();
                     $.ajax({
                         url: '/subjects/quizzes/' + quizId + '/test/submitquiz',
-                        type: 'GET',
+                        type: 'POST',
+                        timeout: 2000,
 
                         success: function (result) {
                             const correctAnswerData = result;
                             console.log(correctAnswerData);
 
-                            var totalCorrect;
-                            var totalQuestions;
+                            let totalCorrect = 0;
+                            let totalQuestions = 0;
 
                             for (i = 0; i < correctAnswerData.length; i++) {
                                 let answerNumber = i + 1;
@@ -143,38 +148,47 @@
                                     let inputAnswerId = $('input[name="question' + answerNumber + 'AnswerId"]:checked').prop("id");
                                     let answerLabel = $('label[for="' + inputAnswerId + '"]');
                                     totalCorrect += 1;
-                                    answerLabel.append("CORRECT!");
+                                    answerLabel.append('<div style="display:inline; margin-left:20%;" class="alert alert-success" role="alert">Correct!</div>');
 
                                 } else if (inputAnswer != correctAnswerId) {
                                     let inputAnswerId = $('input[name="question' + answerNumber + 'AnswerId"]:checked').prop("id");
                                     let answerLabel = $('label[for="' + inputAnswerId + '"]');
 
-                                    answerLabel.append("INCORRECT!");
+                                    answerLabel.append('<div  style="display:inline; margin-left:20%;" class="alert alert-danger" role="alert">Incorrect!</div>');
 
                                 }
 
                             }
-                            // var data = {
-                            //     totalCorrect: totalCorrect,
-                            //     userId: user_id,
-                            //     quuiz
+                            console.log(totalCorrect);
+                            console.log(userId);
+                            var updateData = {
+                                totalCorrect: totalCorrect,
+                                userId: userId,
+                            }
+                            console.log(updateData);
 
-                            // }
-                            // // send another AJAX request with
-                            // // user_id, quiz_id, and score to update db
-                            // // update page with feedback
-                            // $.ajax({
-                            //     url: '/subjects/quizzes/' + quizId + '/test/submitquiz',
-                            //     type: 'POST',
-                            //     contentType: "application/json; charset=utf-8",
-                            //     data: JSON.stringify(data),
-                            //     success: function (result) {
+                            const percentScore = ((totalCorrect/totalQuestions) * 100);
+                            summary = [];
+                            summary.push('<div class="jumbotron">');
+                            summary.push('<div class="container">');
+                            summary.push('<h1 class="display-4">Quiz Summary</h1>');
+                            summary.push('<p class="lead">You got '+ totalCorrect +'/'+totalQuestions+' correct! ('+ percentScore+'%) </p>');
+                            summary.push('</div></div>');
+                            $("#subTitle").before(summary.join(''));
+                            // send another AJAX request with
+                            // user_id, quiz_id, and score to update db
+                            // update page with feedback
+                            $.ajax({
+                                type: 'POST',
+                                url: '/subjects/quizzes/' + quizId + '/test/updategrades',
+                                data: updateData,
+                                success: function (result) {
 
-                            //     }
-                            // })
-                            // // checkmarks/correct for correct answers
+                                }
+                            })
+                            // checkmarks/correct for correct answers
 
-                            // // x's/incorrect for incorrect answers
+                            // x's/incorrect for incorrect answers
 
                         }
                     })

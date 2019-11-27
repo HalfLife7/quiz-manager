@@ -1,7 +1,9 @@
+.capitalize {
+    text-transform: capitalize;
+}
+
 .transparent {
     background-color: transparent;
 }
 
-.capitalize {
-    text-transform: capitalize;
-}
+

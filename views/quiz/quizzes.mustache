@@ -1,0 +1,68 @@
+{{>header}}
+{{#student}}
+{{>navigationbarstudent}}
+{{/student}}
+{{#teacher}}
+{{>navigationbarteacher}}
+{{/teacher}}
+{{#admin}}
+{{>navigationbaradmin}}
+{{/admin}}
+<main class="container" role="main">
+<h1 class="capitalize mt-5 pt-5">{{subjectData}} Quizzes</h1>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Quiz Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Class</th>
+            <th scope="col">Total Questions</th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#quizData}}
+        <tr id="row-quiz-{{quiz_id}}">
+            <td>{{name}}</td>
+            <td>{{description}}</td>
+            <td>{{class}}</td>
+            <td>{{total_questions}}</td>
+            <td><a class="btn btn-primary edit-button" href="/subjects/quizzes/{{quiz_id}}/test" role="button">Start</a></td>
+        </tr>
+        {{/quizData}}
+    </tbody>
+</table>
+
+{{#notification}}
+<div id="notificationMessage" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{headerText}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>{{messageText}}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">{{buttonText}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{/notification}}
+</main>
+
+
+{{>scripts}}
+
+<script defer="defer">
+    $(window).on('load', function () {
+        if (document.body.contains(document.getElementById("notificationMessage")) == true) {
+            $("#notificationMessage").modal('show');
+        }
+    });
+</script>
+{{>footer}}

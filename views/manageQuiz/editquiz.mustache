@@ -9,7 +9,8 @@
 {{>navigationbaradmin}}
 {{/admin}}
 
-<h1>Edit Quiz - {{quizData.name}}</h1>
+<main class="container" role="main">
+<h1 class="mt-5 pt-5">Edit Quiz - {{quizData.name}}</h1>
 <h2>Quiz Details</h2>
 <a class="btn btn-secondary" href="/manage/quizzes" role="button">Back</a>
 <button class="btn btn-primary" type="submit" form="editQuizForm">Save Quiz</button>
@@ -82,6 +83,8 @@
     </div>
 </div>
 {{/notification}}
+</main>
+
 
 {{>scripts}}
 
