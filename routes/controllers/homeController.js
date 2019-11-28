@@ -2,6 +2,15 @@ var express = require('express');
 
 var router = express.Router()
 
+// mysql
+var mysql = require('mysql');
+var connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'admin',
+    database: 'quizmanager'
+});
+
 // middleware to redirect users to the homepage if they do not have valid session data
 function setActive(req, res, next) {
   res.locals.homepageActive = "active";
@@ -30,6 +39,7 @@ router.get('/', function (req, res) {
 
   // if no user is logged in, display the login page, possibly with an error
   if (req.session.loggedIn != "true") {
+
     res.render("loginpage", { errorMessage: loginError });
   }
   // If a user IS logged in, we don't want them to be able to see the login
@@ -54,7 +64,17 @@ router.get('/homepage', function (req, res) {
   // If a user IS logged in, we don't want them to be able to see the login
   // page (you can't be logged in 2x), so redirect them to the users page
   else {
-    res.render("../views/homepage", { userInfo: req.session.userInfo, unauthorizedAccessMessage: unauthorizedAccess });
+    // get JS time and convert to mySQL datetime
+    // https://stackoverflow.com/questions/5129624/convert-js-date-time-to-mysql-datetime/11150727#11150727
+    const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    connection.query("UPDATE user SET last_date_active = (?) WHERE user_id = (?)", [currentDate, req.session.userInfo.userId], function callback(error, results,fields) {
+      if (error !=null) {
+        console.log(error);
+      } else {
+        res.render("../views/homepage", { userInfo: req.session.userInfo, unauthorizedAccessMessage: unauthorizedAccess });
+      }
+    })
+
   }
 });
 

@@ -172,31 +172,46 @@ router.post('/subjects/quizzes/:quizId/test/submitquiz', function (req, res) {
 
 router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
     const totalCorrect = req.body.totalCorrect;
+    const totalQuestions = req.body.totalQuestions;
     const userId = req.body.userId;
     const quizId = req.params.quizId;
     console.log(totalCorrect);
     console.log(userId);
 
-    connection.query("SELECT * FROM student_grade")
-
-    connection.query("INSERT INTO student_grade (user_id, quiz_id, grade_value) VALUES (?,?,?)", [userId, quizId, totalCorrect], function callback(error, results, fields) {
+    // update student grades
+    connection.query("INSERT INTO student_grade (user_id, quiz_id, grade_value, percent_value) VALUES (?,?,?,?)", [userId, quizId, totalCorrect, ((totalCorrect / totalQuestions) * 100)], function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
+            return;
         } else {
-            res.end();
+            // update quiz statistics
+            connection.query("UPDATE quiz SET average = (SELECT AVG(grade_value) FROM student_grade WHERE quiz_id = (?)), total_attempts = (total_attempts + 1)", [quizId], function callback(error, results, fields) {
+                if (error != null) {
+                    console.log(error);
+                    return;
+                } else {
+                    // update student quiz statistics
+                    connection.query("INSERT INTO student_quiz_statistics (user_id, quiz_id, subject_id, total_attempts, max_grade, min_grade, average_grade) VALUES(?,?,(SELECT subject_id FROM quiz WHERE quiz_id = ?),(SELECT total_attempts FROM quiz WHERE quiz_id = (?)),(SELECT MAX(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)),(SELECT MIN(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)),(SELECT AVG(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?))) ON DUPLICATE KEY UPDATE subject_id = (SELECT subject_id FROM quiz WHERE quiz_id = ?), total_attempts = (total_attempts + 1), max_grade = (SELECT MAX(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)), min_grade = (SELECT MIN(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)), average_grade = (SELECT AVG(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?))", [userId, quizId, quizId, quizId, userId, quizId, userId, quizId, userId, quizId, quizId, userId, quizId, userId, quizId, userId, quizId], function callback(error, results, fields) {
+                        if (error != null) {
+                            console.log(error);
+                            return;
+                        } else {
+                            // check for achievement unlock
+                            connection.query('SELECT * FROM student_quiz_statistics WHERE user_id = (?)', [userId], function callback(error, results, fields) {
+                                if (error != null) {
+                                    console.log(error);
+                                    return;
+                                } else {
+                                    
+                                }
+                            })
+                            res.end("Successfully updated grades!");
+                        }
+                    });
+                }
+            })
         }
     })
-    // get answers for the questions
-
-    // compare with answers that then user submitted
-
-    // return data for which answers were correct
-
-    // update user attempts
-
-    // store user's score in scores tables
-
-    // update statistics
 })
 
 module.exports = router;

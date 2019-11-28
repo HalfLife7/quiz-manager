@@ -21,6 +21,10 @@ connection.connect((err) => {
   console.log('mySQL Connected!');
 });
 
+this.connection.on('error', function(err) {
+  console.log('Caught this error: ' + err.toString());
+})
+
 // We use the .urlencoded middleware to process form data in the request body,
 // which is something that occurs when we use a POST request.
 app.use(express.urlencoded({

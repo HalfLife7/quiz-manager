@@ -164,6 +164,7 @@
                             var updateData = {
                                 totalCorrect: totalCorrect,
                                 userId: userId,
+                                totalQuestions: totalQuestions
                             }
                             console.log(updateData);
 
@@ -183,7 +184,7 @@
                                 url: '/subjects/quizzes/' + quizId + '/test/updategrades',
                                 data: updateData,
                                 success: function (result) {
-
+                                    console.log(result);
                                 }
                             })
                             // checkmarks/correct for correct answers
