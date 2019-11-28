@@ -8,182 +8,65 @@
 {{#admin}}
 {{>navigationbaradmin}}
 {{/admin}}
+<main class="container" role="main">
+    <h1 class="capitalize mt-5 pt-5">User Profile</h1>
+    <h2>{{userInfo.firstName}} {{userInfo.lastName}}</h2>
 
-<h1>Quiz Attempt - {{quizData.name}}</h1>
-<h2 id="subTitle">Quiz Details</h2>
-<button class="btn btn-primary" id="submitButton">Submit Quiz</button>
-<form style="width: 50%; margin: auto;" id="editQuizForm" method="post"
-    action="/subjects/quizzes/{{quizData.quiz_id}}/test/submitquiz">
-    <input type="hidden" name="userId" id="userId" value="{{userInfo.userId}}">
-    <div class="form-group">
-        <label for="name">Name</label>
-        <input readonly type="text" class="form-control" name="name" id="name" placeholder="Quiz Name"
-            value="{{quizData.name}}">
-    </div>
-    <div class="form-group">
-        <label for="class">Class</label>
-        <input readonly type="text" class="form-control" name="class" id="class" placeholder="Class Name"
-            value="{{quizData.class}}">
-    </div>
-    <div class="form-group">
-        <label for="description">Description</label>
-        <textarea readonly class="form-control" name="description" id="description"
-            rows="3">{{quizData.description}}</textarea>
-    </div>
-    <h2>Questions</h2>
-    <div id="answers">
-        {{#quizQuestionsData}}
-        <div class="form-group answer-group" id="question-{{question_id}}">
-            <input type="hidden" name="question{{questionNumber}}Id" id="questionId{{question_id}}"
-                value="{{question_id}}">
-            <label for="question{{questionNumber}}Text">Question {{questionNumber}}</label>
-            <textarea readonly class="form-control" name="question{{questionNumber}}Text"
-                id="questionText{{questionNumber}}" rows="3">{{text}}</textarea>
+    <form id="updateUserSettings" method="post" action="/account/settings/{{userInfo.userId}}/updatesettings">
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="optIn" id="optIn">
+            <label class="form-check-label" for="optIn">Opt in leaderboard</label>
         </div>
-        {{/quizQuestionsData}}
-    </div>
-</form>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="useNickname" id="useNickname">
+            <label class="form-check-label" for="useNickname">Use nickname on leaderboard</label>
+        </div>
+        <button class="btn btn-primary" id="submitButton" type="submit">Update Settings</button>
+    </form>
+
+    <form id="updatePassword" method="post" action="/account/settings/{{userInfo.userId}}/updatepassword">
+        <div class="form-group">
+            <label for="currentPassword">Current Password:</label>
+            <input type="text" class="form-control" name="currentPassword" id="currentPassword"
+                placeholder="Current Password">
+        </div>
+        <div class="form-group">
+            <label for="newPassword">New Password:</label>
+            <input type="text" class="form-control" name="newPassword" id="newPassword" placeholder="New Password">
+        </div>
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="text" class="form-control" name="confirmPassword" id="confirmPassword"
+                placeholder="Confirm Password">
+        </div>
+        <button class="btn btn-primary" id="submitButton" type="submit">Update Password</button>
+    </form>
 
 
-{{#notification}}
-<div id="notificationMessage" class="modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{headerText}}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>{{messageText}}</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal">{{buttonText}}</button>
+    {{#notification}}
+    <div id="notificationMessage" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{headerText}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>{{messageText}}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn {{type}}" data-dismiss="modal">{{buttonText}}</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-{{/notification}}
+    {{/notification}}
+</main>
+
 
 {{>scripts}}
-
-<script type="text/javascript">
-
-    const quizId = $("#quizId").val();
-    const userId = $("#userId").val();
-
-    $(document).ready(function () {
-        $('.answer-group').each(function (index, object) {
-            const questionId = $(object).attr('id').split('-')[1];
-
-            let questionNumber = index + 1;
-            //console.log(questionId);
-            $.ajax({
-                url: '/subjects/quizzes/' + quizId + '/test/' + questionId,
-                type: 'GET',
-                success: function (result) {
-                    let answerData = JSON.parse(result);
-                    //console.log(answerData);
-                    for (i = 0; i < answerData.length; i++) {
-                        let answerNumber = i + 1;
-                        //console.log(answerData.length);
-                        //console.log(i);
-                        //console.log(answerData[i]);
-                        var answerRow = [];
-                        var questionAnswerId = answerData[i]["question_answer_id"];
-                        //console.log(questionAnswerId);
-                        //answerRow.push('<input type="hidden" name="question' + questionNumber + 'AnswerId" id="question' + questionNumber + 'AnswerId" value="' + questionAnswerId + '">');
-                        answerRow.push('<div class="form-check">');
-                        answerRow.push('<input class="form-check-input" required type="radio"name="question' + questionNumber + 'AnswerId" id="question' + questionNumber + 'answer' + answerNumber + '" value="' + questionAnswerId + '">');
-                        answerRow.push('<label class="form-check-label" for="question' + questionNumber + 'answer' + answerNumber + '" >' + answerData[i].answer_text + '</label>');
-                        answerRow.push('</div>');
-                        $(object).append(answerRow.join(''));
-                    }
-
-                }
-            })
-        });
-
-        // on click listener for submit button
-        $('#submitButton').click(function () {
-            // show modal to confirm if they really do want to delete
-            bootbox.confirm("Are you sure you want to submit your quiz?", function (result) {
-                // if they confirm, redirect to route for deleting
-                if (result == true) {
-                    //console.log(result);
-                    // if they confirm, ajax request to delete the quiz
-                    //$('#editQuizForm').submit();
-                    $.ajax({
-                        url: '/subjects/quizzes/' + quizId + '/test/submitquiz',
-                        type: 'GET',
-
-                        success: function (result) {
-                            const correctAnswerData = result;
-                            console.log(correctAnswerData);
-
-                            var totalCorrect;
-                            var totalQuestions;
-
-                            for (i = 0; i < correctAnswerData.length; i++) {
-                                let answerNumber = i + 1;
-                                // $('input[name=name_of_your_radiobutton]:checked').val();
-                                let inputAnswer = $('input[name="question' + answerNumber + 'AnswerId"]:checked').val();
-
-                                console.log(inputAnswer)
-
-                                let correctAnswerId = correctAnswerData[i]["question_answer_id"];
-                                let questionId = correctAnswerData[i]["question_id"];
-                                let correctAnswer = correctAnswerData[i]["answer_text"];
-
-                                console.log(correctAnswerId);
-                                totalQuestions += 1;
-                                // if selected answer matches the correct answer, update the page
-                                if (inputAnswer == correctAnswerId) {
-                                    let inputAnswerId = $('input[name="question' + answerNumber + 'AnswerId"]:checked').prop("id");
-                                    let answerLabel = $('label[for="' + inputAnswerId + '"]');
-                                    totalCorrect += 1;
-                                    answerLabel.append("CORRECT!");
-
-                                } else if (inputAnswer != correctAnswerId) {
-                                    let inputAnswerId = $('input[name="question' + answerNumber + 'AnswerId"]:checked').prop("id");
-                                    let answerLabel = $('label[for="' + inputAnswerId + '"]');
-
-                                    answerLabel.append("INCORRECT!");
-
-                                }
-
-                            }
-                            // var data = {
-                            //     totalCorrect: totalCorrect,
-                            //     userId: user_id,
-                            //     quuiz
-
-                            // }
-                            // // send another AJAX request with
-                            // // user_id, quiz_id, and score to update db
-                            // // update page with feedback
-                            // $.ajax({
-                            //     url: '/subjects/quizzes/' + quizId + '/test/submitquiz',
-                            //     type: 'POST',
-                            //     contentType: "application/json; charset=utf-8",
-                            //     data: JSON.stringify(data),
-                            //     success: function (result) {
-
-                            //     }
-                            // })
-                            // // checkmarks/correct for correct answers
-
-                            // // x's/incorrect for incorrect answers
-
-                        }
-                    })
-                }
-
-            })
-        })
-    });
-</script>
 
 <script defer="defer">
     $(window).on('load', function () {
@@ -192,5 +75,4 @@
         }
     });
 </script>
-
 {{>footer}}

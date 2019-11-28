@@ -25,7 +25,7 @@
         </ul>
         <div class="form-inline my-2 my-lg-0">
             <div id="userName">{{userInfo.firstName}} {{userInfo.lastName}}</div>
-            <img src="/images/defaultUserImage.png" alt="defaultUserImage" class="img-thumbnail" width="50" height="50">
+            <img id="profileImageThumbnail" src="{{userInfo.profilePicturePath}}" alt="defaultUserImage" class="img-thumbnail" width="50" height="50">
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -33,7 +33,7 @@
                 </button>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
                     <a class="dropdown-item" href="/account/profile/{{userInfo.userId}}">User Profile</a>
-                    <a class="dropdown-item" href="#">User Settings</a>
+                    <a class="dropdown-item" href="/account/settings/{{userInfo.userId}}">User Settings</a>
                     <a class="dropdown-item" href="/logout">Logout</a>
                 </div>
             </div>

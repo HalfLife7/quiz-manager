@@ -1,0 +1,81 @@
+{{>header}}
+{{#student}}
+{{>navigationbarstudent}}
+{{/student}}
+{{#teacher}}
+{{>navigationbarteacher}}
+{{/teacher}}
+{{#admin}}
+{{>navigationbaradmin}}
+{{/admin}}
+<main class="container" role="main">
+    <h1 class="capitalize mt-5 pt-5">User Profile</h1>
+    <h2 class="pt-4 pb-2">User Settings</h2>
+    <form id="updateUserSettings" method="post" action="/account/settings/{{userInfo.userId}}/updatesettings">
+    <div class="form-group">
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="optIn" id="optIn" {{leaderboardOptIn}}>
+            <label class="form-check-label" for="optIn">Opt in leaderboard</label>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="useNickname" id="useNickname" {{leaderboardUseNickname}}>
+            <label class="form-check-label" for="useNickname">Use nickname on leaderboard</label>
+        </div>
+    </div>
+    <button class="btn btn-primary" id="submitButton" type="submit">Update Settings</button>
+    </form>
+<h2 class="pt-4 pb-2">Update Password</h2>
+    <form id="updatePassword" method="post" action="/account/settings/{{userInfo.userId}}/updatepassword">
+        <div class="form-group">
+            <label for="currentPassword">Current Password:</label>
+            <input type="password" class="form-control" name="currentPassword" id="currentPassword"
+                placeholder="Current Password">
+        </div>
+        <div class="form-group">
+            <label for="newPassword">New Password:</label>
+            <input type="password" class="form-control" name="newPassword" id="newPassword" placeholder="New Password">
+        </div>
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" class="form-control" name="confirmPassword" id="confirmPassword"
+                placeholder="Confirm Password">
+        </div>
+        <button class="btn btn-primary" id="submitButton" type="submit">Update Password</button>
+    </form>
+
+
+    {{#notification}}
+    <div id="notificationMessage" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{headerText}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>{{messageText}}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn {{type}}" data-dismiss="modal">{{buttonText}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{/notification}}
+</main>
+
+
+{{>scripts}}
+
+<script defer="defer">
+    $(window).on('load', function () {
+        if (document.body.contains(document.getElementById("notificationMessage")) == true) {
+            $("#notificationMessage").modal('show');
+        }
+    });
+</script>
+{{>footer}}

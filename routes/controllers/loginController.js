@@ -50,7 +50,9 @@ router.post('/attemptlogin', function (req, res) {
             firstName: results[0].first_name,
             lastName: results[0].last_name,
             accountType: results[0].account_type,
-            userId: results[0].user_id
+            userId: results[0].user_id,
+            profilePicturePath: results[0].profile_picture_path
+
           }
 
         // check if the user account_type
@@ -157,7 +159,8 @@ router.post('/forgotpasswordconfirmemail', function (req, res) {
             firstName: results[0].first_name,
             lastName: results[0].last_name,
             accountType: results[0].account_type,
-            userId: results[0].user_id
+            userId: results[0].user_id,
+            profilePicturePath: results[0].profile_picture_path
           }
         console.log(req.session.forgotPassword.secretAnswer);
         res.redirect('/secretanswer');

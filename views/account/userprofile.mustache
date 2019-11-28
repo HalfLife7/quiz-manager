@@ -9,41 +9,71 @@
 {{>navigationbaradmin}}
 {{/admin}}
 <main class="container" role="main">
-<h1 class="capitalize mt-5 pt-5">{{subjectData}} Edit User Profile</h1>
-<div class="row featurette">
-      <div class="col-md-7 order-md-2">
-        <h2 class="featurette-heading">Oh yeah, it’s that good. <span class="text-muted">See for yourself.</span></h2>
-        <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur. Fusce dapibus, tellus ac cursus commodo.</p>
-      </div>
-      <div class="col-md-5 order-md-1">
-        <svg class="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="500" height="500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: 500x500"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"></rect><text x="50%" y="50%" fill="#aaa" dy=".3em">500x500</text></svg>
-      </div>
-</div>
+    <h1 class="capitalize mt-5 pt-5">User Profile</h1>
+    <h2>{{userInfo.firstName}} {{userInfo.lastName}}</h2>
+    <div class="row featurette">
+            <div class="col-md-5 d-flex align-items-center justify-content-center">
+                <img id="profileImage" class="mx-auto" width="256"
+                height="256" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" src="{{userData.profile_picture_path}}">
+        </div>
+        <div class="col-md-7">
+            <form id="updateProfile" method="post" enctype="multipart/form-data"
+                action="/account/profile/{{userInfo.userId}}/update">
+                <div class="form-group">
+                    <label for="nickname">Nickname:</label>
+                    <input type="text" class="form-control" name="nickname" id="nickname" placeholder="Nickname"
+                        value="{{userData.nickname}}">
+                </div>
+                <div class="form-group">
+                    <label for="program">Program:</label>
+                    <input type="text" class="form-control" name="program" id="program" placeholder="Program Name"
+                        value="{{userData.program}}">
+                </div>
+                <div class="form-group">
+                    <label for="school">School:</label>
+                    <input type="text" class="form-control" name="school" id="school" placeholder="School Name"
+                        value="{{userData.school}}">
+                </div>
+                <div class="form-group">
+                    <label for="profileImage">Update Profile Image:</label>
+                    <input type="file" class="form-control" name="profileImage" id="profileImageInput">
+                </div>
+                <button class="btn btn-primary" id="submitButton" type="submit">Save</button>
+            </form>
+        </div>
 
-{{#notification}}
-<div id="notificationMessage" class="modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{headerText}}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>{{messageText}}</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal">{{buttonText}}</button>
+    </div>
+
+    {{#notification}}
+    <div id="notificationMessage" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{headerText}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>{{messageText}}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn {{type}}" data-dismiss="modal">{{buttonText}}</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-{{/notification}}
+    {{/notification}}
 </main>
 
 
 {{>scripts}}
+
+<script>
+    $(document).ready(function(){
+        $('#profileImage[src=""]').attr('src', '/images/defaultUserImage.png');
+    });
+</script>
 
 <script defer="defer">
     $(window).on('load', function () {
