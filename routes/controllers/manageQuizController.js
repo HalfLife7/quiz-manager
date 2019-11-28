@@ -46,7 +46,8 @@ router.use(checkAccountType);
 
 // mysql
 var mysql = require('mysql');
-var connection = mysql.createConnection({
+var pool  = mysql.createPool({
+  connectionLimit : 99,
     host: 'localhost',
     user: 'root',
     password: 'admin',
@@ -58,7 +59,7 @@ router.get('/manage/quizzes', function (req, res) {
     const notification = req.session.notification;
     req.session.notification = "";
 
-    connection.query("SELECT quiz.*, subject.name as subject_name FROM quiz JOIN subject ON quiz.subject_id = subject.subject_id", function callback(error, results, fields) {
+    pool.query("SELECT quiz.*, subject.name as subject_name FROM quiz JOIN subject ON quiz.subject_id = subject.subject_id", function callback(error, results, fields) {
         if (error != null) {
             // console.log(error);
         } else {
@@ -71,7 +72,7 @@ router.get('/manage/quizzes', function (req, res) {
 // create a quiz
 router.get('/manage/quizzes/create', function (req, res) {
     // get all subjects to fill field
-    connection.query("SELECT * FROM subject", function callback(error, results, fields) {
+    pool.query("SELECT * FROM subject", function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
@@ -83,7 +84,7 @@ router.get('/manage/quizzes/create', function (req, res) {
 
 router.post('/manage/quizzes/create', function (req, res) {
     // console.log(req.body);
-    connection.query("INSERT INTO quiz (name, description, subject_id, class, total_questions) VALUES (?,?,(SELECT subject_id FROM subject WHERE name = ?),?, 0)", [req.body.name, req.body.description, req.body.subject, req.body.class], function callback(error, results, fields) {
+    pool.query("INSERT INTO quiz (name, description, subject_id, class, total_questions) VALUES (?,?,(SELECT subject_id FROM subject WHERE name = ?),?, 0)", [req.body.name, req.body.description, req.body.subject, req.body.class], function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
@@ -99,21 +100,21 @@ router.get('/manage/quizzes/:id', function (req, res) {
     req.session.notification = "";
 
     const quizId = req.params.id;
-    connection.query("SELECT * FROM quiz where quiz_id = ?", quizId, function callback(error, results, fields) {
+    pool.query("SELECT * FROM quiz where quiz_id = ?", quizId, function callback(error, results, fields) {
         if (error != null) {
             // console.log(error);
         } else {
             // console.log(results[0]);
             const quizData = results[0];
 
-            connection.query("SELECT * FROM question where quiz_id = ?", quizId, function callback(error, results, fields) {
+            pool.query("SELECT * FROM question where quiz_id = ?", quizId, function callback(error, results, fields) {
                 if (error != null) {
                     // console.log(error);
                 } else {
                     // console.log(results);
                     const quizQuestionsData = results;
 
-                    connection.query("SELECT * FROM subject", function callback(error, results, fields) {
+                    pool.query("SELECT * FROM subject", function callback(error, results, fields) {
                         if (error != null) {
                             console.log(error);
                         } else {
@@ -134,7 +135,7 @@ router.post('/manage/quizzes/:id/edit', function (req, res) {
     // console.log(req.body);
     // console.log(req.params);
     const quizId = req.params.id;
-    connection.query("UPDATE quiz SET name = (?), description = (?), class = (?), total_questions = (SELECT COUNT(quiz_id) FROM question WHERE quiz_id = ?) WHERE quiz_id = (?)", [req.body.name, req.body.description, req.body.class, quizId, quizId], function callback(error, results, fields) {
+    pool.query("UPDATE quiz SET name = (?), description = (?), class = (?), total_questions = (SELECT COUNT(quiz_id) FROM question WHERE quiz_id = ?) WHERE quiz_id = (?)", [req.body.name, req.body.description, req.body.class, quizId, quizId], function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
@@ -150,7 +151,7 @@ router.post('/manage/quizzes/:id/edit', function (req, res) {
 router.delete('/manage/quizzes/:id/delete', function (req,res) {
     const quizId = req.params.id
     console.log(req.params.id);
-    connection.query("DELETE FROM quiz WHERE quiz_id = (?)", [quizId], function callback(error, results, fields) {
+    pool.query("DELETE FROM quiz WHERE quiz_id = (?)", [quizId], function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {

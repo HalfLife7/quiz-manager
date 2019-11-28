@@ -46,7 +46,8 @@ router.use(checkAccountType);
 
 // mysql
 var mysql = require('mysql');
-var connection = mysql.createConnection({
+var pool  = mysql.createPool({
+  connectionLimit : 99,
     host: 'localhost',
     user: 'root',
     password: 'admin',
@@ -57,7 +58,7 @@ var connection = mysql.createConnection({
 // get create quiz question page
 router.get('/manage/quizzes/:quizId/question/create', function (req, res) {
     quizId = req.params.quizId
-    connection.query("SELECT * FROM quiz WHERE quiz_id = (?)", quizId, function callback(error, results, fields) {
+    pool.query("SELECT * FROM quiz WHERE quiz_id = (?)", quizId, function callback(error, results, fields) {
         const quizData = results[0];
         if (error != null) {
             console.log(error);
@@ -123,12 +124,12 @@ router.post('/manage/quizzes/:quizId/question/create', function (req, res) {
     console.log(answerData);
 
     // insert question into database
-    connection.query("INSERT INTO question (quiz_id, text, type) VALUES (?,?,?)", [quizId, questionData.questionText, questionData.questionType], function callback(error, results, fields) {
+    pool.query("INSERT INTO question (quiz_id, text, type) VALUES (?,?,?)", [quizId, questionData.questionText, questionData.questionType], function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
             // get the question_id of the newly inserted question
-            connection.query("SELECT MAX(question_id) AS question_id FROM question ", function callback(error, results, fields) {
+            pool.query("SELECT MAX(question_id) AS question_id FROM question ", function callback(error, results, fields) {
                 if (error != null) {
                     console.log(error);
                 } else {
@@ -143,12 +144,12 @@ router.post('/manage/quizzes/:quizId/question/create', function (req, res) {
                     var sql = "INSERT INTO question_answer (answer_text, is_correct, question_id) VALUES ?"
 
                     // bulk insert answers into database
-                    connection.query(sql, [answerData], function callback(error, results, fields) {
+                    pool.query(sql, [answerData], function callback(error, results, fields) {
                         if (error != null) {
                             console.log(error);
                         } else {
                             // update the total question count for the quiz
-                            connection.query('UPDATE quiz SET total_questions = (SELECT COUNT(quiz_id) FROM question WHERE quiz_id = ?) where quiz_id = (?)', [quizId, quizId], function callback(error, results, fields) {
+                            pool.query('UPDATE quiz SET total_questions = (SELECT COUNT(quiz_id) FROM question WHERE quiz_id = ?) where quiz_id = (?)', [quizId, quizId], function callback(error, results, fields) {
                                 if (error != null) {
                                     console.log(error);
                                 } else {
@@ -172,7 +173,7 @@ router.get('/manage/quizzes/:quizId/question/:questionId', function (req, res) {
     const quizId = req.params.quizId;
     const questionId = req.params.questionId
     // get question details
-    connection.query("SELECT * FROM question where (question_id = ?) AND (quiz_id = ?)", [questionId, quizId], function callback(error, results, fields) {
+    pool.query("SELECT * FROM question where (question_id = ?) AND (quiz_id = ?)", [questionId, quizId], function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
@@ -188,7 +189,7 @@ router.get('/manage/quizzes/:quizId/question/:questionId', function (req, res) {
             }
 
             // get answers for that question
-            connection.query("SELECT * FROM question_answer where question_id = ?", questionId, function callback(error, results, fields) {
+            pool.query("SELECT * FROM question_answer where question_id = ?", questionId, function callback(error, results, fields) {
                 if (error != null) {
                     console.log(error);
                 } else {
@@ -288,7 +289,7 @@ router.post('/manage/quizzes/:quizId/question/:questionId/edit', function (req, 
     console.log(answerData);
 
     // update question in database
-    connection.query("UPDATE question SET text = ? WHERE question_id = ? AND quiz_id = ?", [questionData.questionText, questionId, quizId], function callback(error, results, fields) {
+    pool.query("UPDATE question SET text = ? WHERE question_id = ? AND quiz_id = ?", [questionData.questionText, questionId, quizId], function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
@@ -299,7 +300,7 @@ router.post('/manage/quizzes/:quizId/question/:questionId/edit', function (req, 
             });
 
             // bulk insert answers into database
-            connection.query(queries, [answerData], function callback(error, results, fields) {
+            pool.query(queries, [answerData], function callback(error, results, fields) {
                 if (error != null) {
                     console.log(error);
                 } else {
@@ -320,18 +321,18 @@ router.delete('/manage/quizzes/:quizId/question/:questionId/delete', function (r
     const questionId = req.params.questionId
     console.log(req.params.id);
     // delete answers tied to that question first
-    connection.query("DELETE FROM question_answer WHERE question_id = (?)", [questionId], function callback(error, results, fields) {
+    pool.query("DELETE FROM question_answer WHERE question_id = (?)", [questionId], function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
             console.log(results);
             // then delete the question
-            connection.query("DELETE FROM question WHERE question_id = (?)", [questionId], function callback(error, results, fields) {
+            pool.query("DELETE FROM question WHERE question_id = (?)", [questionId], function callback(error, results, fields) {
                 if (error != null) {
                     console.log(error);
                 } else {
                     // update the total question count for the quiz
-                    connection.query('UPDATE quiz SET total_questions = (SELECT COUNT(quiz_id) FROM question WHERE quiz_id = ?) where quiz_id = (?)', [quizId, quizId], function callback(error, results, fields) {
+                    pool.query('UPDATE quiz SET total_questions = (SELECT COUNT(quiz_id) FROM question WHERE quiz_id = ?) where quiz_id = (?)', [quizId, quizId], function callback(error, results, fields) {
                         if (error != null) {
                             console.log(error);
                         } else {

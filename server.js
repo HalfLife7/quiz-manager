@@ -9,21 +9,45 @@ app.use(lowercasePaths())
 
 // mysql
 var mysql = require('mysql');
-var connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'admin',
-  database: 'quizmanager'
-});
 
-connection.connect((err) => {
-  if (err) throw err;
-  console.log('mySQL Connected!');
-});
+var connection;
 
-this.connection.on('error', function(err) {
-  console.log('Caught this error: ' + err.toString());
-})
+// https://stackoverflow.com/questions/20210522/nodejs-mysql-error-connection-lost-the-server-closed-the-connection
+// if the sql connection closes due to timeout, recreate the connection
+function handleDisconnect() {
+  // Recreate the connection, since
+  // the old one cannot be reused.
+  var connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'admin',
+    database: 'quizmanager'
+  });
+
+  connection.connect(function (err) {
+    if (err) {
+      console.log('error when connecting to db:', err);
+      // We introduce a delay before attempting to reconnect,
+      // to avoid a hot loop, and to allow our node script to
+      // process asynchronous requests in the meantime.                                
+      // If you're also serving http, display a 503 error.
+      setTimeout(handleDisconnect, 2000);
+    } else {
+      console.log('mySQL Connected!');
+    }
+  });
+
+  connection.on('error', function (err) {
+    console.log('db error', err);
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
+      handleDisconnect();                         // lost due to either server restart, or a
+    } else {                                      // connnection idle timeout (the wait_timeout
+      throw err;                                  // server variable configures this)
+    }
+  });
+}
+
+handleDisconnect();
 
 // We use the .urlencoded middleware to process form data in the request body,
 // which is something that occurs when we use a POST request.

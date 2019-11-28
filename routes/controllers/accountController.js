@@ -34,7 +34,8 @@ router.use(checkAccountType);
 
 // mysql
 var mysql = require('mysql');
-var connection = mysql.createConnection({
+var pool  = mysql.createPool({
+  connectionLimit : 99,
     host: 'localhost',
     user: 'root',
     password: 'admin',
@@ -50,7 +51,7 @@ router.get('/account/profile/:userId', function (req, res) {
     req.session.notification = "";
 
     const userId = req.params.userId;
-    connection.query('SELECT * FROM user WHERE user_id = (?)', userId, function callback(error, results, fields) {
+    pool.query('SELECT * FROM user WHERE user_id = (?)', userId, function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
@@ -109,7 +110,7 @@ router.post('/account/profile/:userId/update', function (req, res) {
             // check if no image was uploaded
             if (req.file == undefined) {
                 console.log(req.body);
-                connection.query("UPDATE user SET nickname = (?), program = (?), school = (?) WHERE user_id = (?)", [req.body.nickname, req.body.program, req.body.school, userId], function callback(error, results, fields) {
+                pool.query("UPDATE user SET nickname = (?), program = (?), school = (?) WHERE user_id = (?)", [req.body.nickname, req.body.program, req.body.school, userId], function callback(error, results, fields) {
                     if (error != null) {
                         console.log(error);
                     } else {
@@ -123,7 +124,7 @@ router.post('/account/profile/:userId/update', function (req, res) {
                 console.log(req.file);
                 const profileImagePath = "/images/profilepictures/" + req.file.filename;
                 // req.file.filename
-                connection.query("UPDATE user SET nickname = (?), program = (?), school = (?), profile_picture_path = (?) WHERE user_id = (?)", [req.body.nickname, req.body.program, req.body.school, profileImagePath, userId], function callback(error, results, fields) {
+                pool.query("UPDATE user SET nickname = (?), program = (?), school = (?), profile_picture_path = (?) WHERE user_id = (?)", [req.body.nickname, req.body.program, req.body.school, profileImagePath, userId], function callback(error, results, fields) {
                     if (error != null) {
                         console.log(error);
                     } else {
@@ -144,7 +145,7 @@ router.get('/account/settings/:userId', function (req, res) {
     req.session.notification = "";
 
     const userId = req.params.userId;
-    connection.query('SELECT * FROM user WHERE user_id = (?)', userId, function callback(error, results, fields) {
+    pool.query('SELECT * FROM user WHERE user_id = (?)', userId, function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
@@ -179,7 +180,7 @@ router.post('/account/settings/:userId/updatesettings', function (req, res) {
         useNickname = "false";
     }
 
-    connection.query("UPDATE user SET leaderboard_opt_in = (?), leaderboard_use_nickname = (?) WHERE user_id = (?)", [optIn, useNickname, userId], function callback(error, results, fields) {
+    pool.query("UPDATE user SET leaderboard_opt_in = (?), leaderboard_use_nickname = (?) WHERE user_id = (?)", [optIn, useNickname, userId], function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
@@ -197,7 +198,7 @@ router.post('/account/settings/:userId/updatepassword', function (req, res) {
 
     console.log(req.body);
     // check if current password is correct
-    connection.query("SELECT * FROM user WHERE user_id = (?)", [userId], function callback(error, results, fields) {
+    pool.query("SELECT * FROM user WHERE user_id = (?)", [userId], function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
@@ -210,7 +211,7 @@ router.post('/account/settings/:userId/updatepassword', function (req, res) {
                     const hashedNewPassword = passwordHash.generate(newPassword);
 
                     // update the password
-                    connection.query('UPDATE user SET password = (?) WHERE user_id = (?)', [hashedNewPassword, userId], function callback(error, results, fields) {
+                    pool.query('UPDATE user SET password = (?) WHERE user_id = (?)', [hashedNewPassword, userId], function callback(error, results, fields) {
                         if (error != null) {
                             console.log(null);
                         } else {

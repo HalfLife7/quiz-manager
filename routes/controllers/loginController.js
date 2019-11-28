@@ -5,7 +5,8 @@ var router = express.Router()
 
 // mysql
 var mysql = require('mysql');
-var connection = mysql.createConnection({
+var pool  = mysql.createPool({
+  connectionLimit : 99,
   host: 'localhost',
   user: 'root',
   password: 'admin',
@@ -21,7 +22,7 @@ router.get('/logout', function (req, res) {
 router.post('/attemptlogin', function (req, res) {
   console.log(req.body);
 
-  connection.query("SELECT * FROM user WHERE email = ?", req.body.email, function callback(error, results, fields) {
+  pool.query("SELECT * FROM user WHERE email = ?", req.body.email, function callback(error, results, fields) {
     if (error != null) {
       console.log(error);
     } else {
@@ -91,11 +92,11 @@ router.post('/registeruser', function (req, res) {
   if (req.body.password == req.body.confirmPassword) {
     var hashedPassword = passwordHash.generate(req.body.password);
 
-    connection.query("INSERT into user (email, password, account_type, first_name, last_name, secret_question, secret_answer) VALUES (?,?,?,?,?,?,?)", [req.body.email, hashedPassword, "student", req.body.firstName, req.body.lastName, req.body.secretQuestion, req.body.secretAnswer], function callback(error, results, fields) {
+    pool.query("INSERT into user (email, password, account_type, first_name, last_name, secret_question, secret_answer) VALUES (?,?,?,?,?,?,?)", [req.body.email, hashedPassword, "student", req.body.firstName, req.body.lastName, req.body.secretQuestion, req.body.secretAnswer], function callback(error, results, fields) {
       if (error != null) {
         console.log(error)
       } else {
-        connection.query("SELECT user_id FROM user where email = (?)", req.body.email, function callback(error, results, fields) {
+        pool.query("SELECT user_id FROM user where email = (?)", req.body.email, function callback(error, results, fields) {
           if (error != null) {
             console.log(error);
           } else {
@@ -132,7 +133,7 @@ router.get('/forgotpassword', function (req, res) {
 router.post('/forgotpasswordconfirmemail', function (req, res) {
   console.log(req.body);
 
-  connection.query("SELECT * FROM user WHERE email = ?", req.body.email, function callback(error, results, fields) {
+  pool.query("SELECT * FROM user WHERE email = ?", req.body.email, function callback(error, results, fields) {
     if (error != null) {
       console.log(error);
     } else {
@@ -215,7 +216,7 @@ router.post('/forgotpasswordupdatepassword', function (req, res) {
   if (req.body.password == req.body.confirmPassword && req.body.password != "") {
     var hashedPassword = passwordHash.generate(req.body.password);
 
-    connection.query("UPDATE user SET password = (?) WHERE email = ?", [hashedPassword, req.session.forgotPassword.email], function callback(error, results, fields) {
+    pool.query("UPDATE user SET password = (?) WHERE email = ?", [hashedPassword, req.session.forgotPassword.email], function callback(error, results, fields) {
       if (error != null) {
         console.log(error)
       } else {

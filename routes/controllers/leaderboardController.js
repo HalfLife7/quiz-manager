@@ -33,7 +33,8 @@ router.use(checkAccountType);
 
 // mysql
 var mysql = require('mysql');
-var connection = mysql.createConnection({
+var pool  = mysql.createPool({
+  connectionLimit : 99,
     host: 'localhost',
     user: 'root',
     password: 'admin',

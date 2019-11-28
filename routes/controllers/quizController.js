@@ -33,7 +33,8 @@ router.use(checkAccountType);
 
 // mysql
 var mysql = require('mysql');
-var connection = mysql.createConnection({
+var pool  = mysql.createPool({
+  connectionLimit : 99,
     host: 'localhost',
     user: 'root',
     password: 'admin',
@@ -42,7 +43,7 @@ var connection = mysql.createConnection({
 
 router.get('/quizzes/subjects', function (req, res) {
     // get all subjects
-    connection.query("SELECT * FROM subject", function callback(error, results, fields) {
+    pool.query("SELECT * FROM subject", function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
@@ -57,7 +58,7 @@ router.get('/quizzes/subjects/:subject', function (req, res) {
     console.log(req.params);
     var subject = req.params.subject;
     // get all subjects
-    connection.query("SELECT * FROM quiz WHERE subject_id = (SELECT subject_id FROM subject where name = ?)", subject, function callback(error, results, fields) {
+    pool.query("SELECT * FROM quiz WHERE subject_id = (SELECT subject_id FROM subject where name = ?)", subject, function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
@@ -73,7 +74,7 @@ router.get('/subjects/quizzes/:quizId/test', function (req, res) {
     console.log(req.session.userInfo);
     const quizId = req.params.quizId
     // get quiz data
-    connection.query("SELECT * FROM quiz WHERE quiz_id = ?", quizId, function callback(error, results, fields) {
+    pool.query("SELECT * FROM quiz WHERE quiz_id = ?", quizId, function callback(error, results, fields) {
         if (error != null) {
             //console.log(error);
         } else {
@@ -81,7 +82,7 @@ router.get('/subjects/quizzes/:quizId/test', function (req, res) {
             //console.log(quizData);
 
 
-            connection.query("SELECT * FROM question WHERE quiz_id = ?", quizId, function callback(error, results, fields) {
+            pool.query("SELECT * FROM question WHERE quiz_id = ?", quizId, function callback(error, results, fields) {
                 if (error != null) {
                     //console.log(error);
                 } else {
@@ -99,7 +100,7 @@ router.get('/subjects/quizzes/:quizId/test', function (req, res) {
                     // var query = "SELECT * FROM question_answer WHERE question_id in (?)"
                     // var queryData = [questionNumbers];
 
-                    // connection.query(query, queryData, function callback(error,results, fields) {
+                    // pool.query(query, queryData, function callback(error,results, fields) {
                     //     if (error != null) {
                     //         console.log(error);
                     //     } else {
@@ -128,7 +129,7 @@ router.get('/subjects/quizzes/:quizId/test/:questionId', function (req, res) {
     const quizId = req.params.quizId;
     const questionId = req.params.questionId;
     // get answers
-    connection.query('SELECT question_answer_id, answer_text FROM question_answer WHERE question_id = (?)', [questionId], function callback(error, results, fields) {
+    pool.query('SELECT question_answer_id, answer_text FROM question_answer WHERE question_id = (?)', [questionId], function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
@@ -146,7 +147,7 @@ router.post('/subjects/quizzes/:quizId/test/submitquiz', function (req, res) {
     var query = "SELECT * FROM question_answer WHERE question_id in (?) AND is_correct = true"
     var queryData = [questionNumbers];
 
-    connection.query(query, queryData, function callback(error, results, fields) {
+    pool.query(query, queryData, function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
         } else {
@@ -179,33 +180,33 @@ router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
     console.log(userId);
 
     // update student grades
-    connection.query("INSERT INTO student_grade (user_id, quiz_id, grade_value, percent_value) VALUES (?,?,?,?)", [userId, quizId, totalCorrect, ((totalCorrect / totalQuestions) * 100)], function callback(error, results, fields) {
+    pool.query("INSERT INTO student_grade (user_id, quiz_id, grade_value, percent_value) VALUES (?,?,?,?)", [userId, quizId, totalCorrect, ((totalCorrect / totalQuestions) * 100)], function callback(error, results, fields) {
         if (error != null) {
             console.log(error);
             return;
         } else {
             // update quiz statistics
-            connection.query("UPDATE quiz SET average = (SELECT AVG(grade_value) FROM student_grade WHERE quiz_id = (?)), total_attempts = (total_attempts + 1)", [quizId], function callback(error, results, fields) {
+            pool.query("UPDATE quiz SET average = (SELECT AVG(grade_value) FROM student_grade WHERE quiz_id = (?)), total_attempts = (total_attempts + 1)", [quizId], function callback(error, results, fields) {
                 if (error != null) {
                     console.log(error);
                     return;
                 } else {
                     // update student quiz statistics
-                    connection.query("INSERT INTO student_quiz_statistics (user_id, quiz_id, subject_id, total_attempts, max_grade, min_grade, average_grade) VALUES(?,?,(SELECT subject_id FROM quiz WHERE quiz_id = ?),(SELECT total_attempts FROM quiz WHERE quiz_id = (?)),(SELECT MAX(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)),(SELECT MIN(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)),(SELECT AVG(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?))) ON DUPLICATE KEY UPDATE subject_id = (SELECT subject_id FROM quiz WHERE quiz_id = ?), total_attempts = (total_attempts + 1), max_grade = (SELECT MAX(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)), min_grade = (SELECT MIN(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)), average_grade = (SELECT AVG(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?))", [userId, quizId, quizId, quizId, userId, quizId, userId, quizId, userId, quizId, quizId, userId, quizId, userId, quizId, userId, quizId], function callback(error, results, fields) {
+                    pool.query("INSERT INTO student_quiz_statistics (user_id, quiz_id, subject_id, total_attempts, max_grade, min_grade, average_grade) VALUES(?,?,(SELECT subject_id FROM quiz WHERE quiz_id = ?),(SELECT total_attempts FROM quiz WHERE quiz_id = (?)),(SELECT MAX(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)),(SELECT MIN(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)),(SELECT AVG(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?))) ON DUPLICATE KEY UPDATE subject_id = (SELECT subject_id FROM quiz WHERE quiz_id = ?), total_attempts = (total_attempts + 1), max_grade = (SELECT MAX(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)), min_grade = (SELECT MIN(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)), average_grade = (SELECT AVG(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?))", [userId, quizId, quizId, quizId, userId, quizId, userId, quizId, userId, quizId, quizId, userId, quizId, userId, quizId, userId, quizId], function callback(error, results, fields) {
                         if (error != null) {
                             console.log(error);
                             return;
                         } else {
                             // check for achievement unlock
-                            connection.query('SELECT * FROM student_quiz_statistics WHERE user_id = (?)', [userId], function callback(error, results, fields) {
+                            pool.query('SELECT * FROM student_quiz_statistics WHERE user_id = (?)', [userId], function callback(error, results, fields) {
                                 if (error != null) {
                                     console.log(error);
                                     return;
                                 } else {
-                                    
+                                    res.end("Successfully updated grades!");
                                 }
                             })
-                            res.end("Successfully updated grades!");
+                            
                         }
                     });
                 }

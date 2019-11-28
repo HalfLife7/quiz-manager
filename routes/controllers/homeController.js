@@ -4,7 +4,8 @@ var router = express.Router()
 
 // mysql
 var mysql = require('mysql');
-var connection = mysql.createConnection({
+var pool  = mysql.createPool({
+  connectionLimit : 99,
     host: 'localhost',
     user: 'root',
     password: 'admin',
@@ -67,7 +68,7 @@ router.get('/homepage', function (req, res) {
     // get JS time and convert to mySQL datetime
     // https://stackoverflow.com/questions/5129624/convert-js-date-time-to-mysql-datetime/11150727#11150727
     const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
-    connection.query("UPDATE user SET last_date_active = (?) WHERE user_id = (?)", [currentDate, req.session.userInfo.userId], function callback(error, results,fields) {
+    pool.query("UPDATE user SET last_date_active = (?) WHERE user_id = (?)", [currentDate, req.session.userInfo.userId], function callback(error, results,fields) {
       if (error !=null) {
         console.log(error);
       } else {
