@@ -11,9 +11,10 @@ function checkLogin(req, res, next) {
         res.locals.userInfo = req.session.userInfo;
         res.locals.homepageActive = "inactive";
         res.locals.quizzesActive = "active";
+        res.locals.leaderboardActive = "inactive";
+        res.locals.achievementsActive = "inactive";
         next();
     }
-
 }
 router.use(checkLogin);
 
@@ -33,8 +34,8 @@ router.use(checkAccountType);
 
 // mysql
 var mysql = require('mysql');
-var pool  = mysql.createPool({
-  connectionLimit : 99,
+var pool = mysql.createPool({
+    connectionLimit: 99,
     host: 'localhost',
     user: 'root',
     password: 'admin',
@@ -142,10 +143,14 @@ router.get('/subjects/quizzes/:quizId/test/:questionId', function (req, res) {
 });
 
 router.post('/subjects/quizzes/:quizId/test/submitquiz', function (req, res) {
-    questionNumbers = [1, 2, 3, 26]
+
+    // store JSON values into array (containing the question IDs)
+    const questionIds = Object.values(req.body);
+
     // get all questions
     var query = "SELECT * FROM question_answer WHERE question_id in (?) AND is_correct = true"
-    var queryData = [questionNumbers];
+    // get questions with question IDs that were on the quiz
+    var queryData = [questionIds];
 
     pool.query(query, queryData, function callback(error, results, fields) {
         if (error != null) {
@@ -154,17 +159,8 @@ router.post('/subjects/quizzes/:quizId/test/submitquiz', function (req, res) {
             const answerData = results;
             console.log(answerData);
 
+            // send the answers
             res.send(answerData);
-            //console.log(questionData);
-            // for (i = 0; i < answerData.length; i++) {
-            //     for (j = 0; j < questionNumbers.length; j++) {
-            //         if (answerData[i].question_id == questionNumbers[j]) {
-            //             questionData[j].push(answerData[i]);
-            //         }
-            //     }
-            // }
-            // console.log("after");
-            // console.log(questionData);
         }
     })
 
@@ -197,16 +193,116 @@ router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
                             console.log(error);
                             return;
                         } else {
-                            // check for achievement unlock
-                            pool.query('SELECT * FROM student_quiz_statistics WHERE user_id = (?)', [userId], function callback(error, results, fields) {
+                            // get subject_id of the quiz that was just submitted
+                            pool.query('SELECT subject_id from quiz WHERE quiz_id = (?)', [quizId], function callback(error, results, fields) {
                                 if (error != null) {
                                     console.log(error);
                                     return;
                                 } else {
-                                    res.end("Successfully updated grades!");
+                                    const quizSubjectId = results[0].subject_id;
+                                    // check for achievement unlock
+                                    pool.query('SELECT student_quiz_statistics.*, subject.*, (SELECT subject_id FROM quiz WHERE quiz_id = (?)) AS tracked_subject_id FROM student_quiz_statistics JOIN subject ON student_quiz_statistics.subject_id = subject.subject_id WHERE user_id = (?) ', [quizId, userId], function callback(error, results, fields) {
+                                        if (error != null) {
+                                            console.log(error);
+                                            return;
+                                        } else {
+                                            console.log(results);
+                                            let subjectTotalAttempts = 0;
+                                            // tally up total_attempts from all quizzes of the same subject_id (of the quiz that was just submitted)
+                                            for (i = 0; i < results.length; i++) {
+                                                if (results[i].tracked_subject_id == quizSubjectId) {
+                                                    subjectTotalAttempts += 1;
+                                                }
+                                            }
+                                            console.log("total attempts " + subjectTotalAttempts);
+                                            console.log("subject id " + quizSubjectId);
+
+                                            // #2 - query achievements and get the achievements related to this subject
+                                            pool.query('SELECT * FROM achievement WHERE subject_id = (?)', [quizSubjectId], function callback(error, results, fields) {
+                                                if (error != null) {
+                                                    console.log(error);
+                                                    return;
+                                                } else {
+
+                                                    const relatedAchievements = results;
+                                                    console.log(relatedAchievements);
+                                                    for (i = 0; i < relatedAchievements.length; i++) {
+                                                        if (relatedAchievements[i].subject_id == quizSubjectId) {
+                                                            const achievementId = relatedAchievements[i].achievement_id;
+                                                            const achievementValueGoal = relatedAchievements[i].value_goal;
+
+                                                            // go through achievements related to the subject we just completed
+                                                            pool.query('SELECT * FROM student_achievement WHERE achievement_id = (?) and user_id = (?)', [achievementId, userId], function callback(error, results, fields) {
+                                                                if (error != null) {
+                                                                    console.log(error);
+                                                                    return;
+                                                                } else {
+                                                                    // if there is no entry for this achievement yet, add it
+                                                                    console.log(results);
+                                                                    console.log("3333333333333333333333333333333333333");
+                                                                    if (results.length == 0) {
+                                                                        pool.query('INSERT INTO student_achievement (user_id, achievement_id, value_actual, value_goal) VALUES(?,?,?,?)', [userId, achievementId, 1, achievementValueGoal], function callback(error, results, fields) {
+                                                                            if (error != null) {
+                                                                                console.log(error);
+                                                                                return;
+                                                                            } else {
+                                                                                // do nothing after update, let the loop continue to update any other related acheivements
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        const actualAchievement = results[0];
+                                                                        console.log(actualAchievement);
+                                                                        console.log("222222222222222222222222");
+                                                                        // if there is already an entry for this achievement, update it IF it isnt already unlocked
+                                                                        if (actualAchievement.unlocked != null) {
+                                                                            // do nothing if its already unlocked (will be null if it isnt unlocked)
+                                                                        } else {
+                                                                            // update the progress if not unlocked yet
+                                                                            // UPDATE quiz SET average = (SELECT AVG(grade_value) FROM student_grade WHERE quiz_id = (?)), total_attempts = (total_attempts + 1)", [quizId],
+                                                                            pool.query('UPDATE student_achievement SET value_actual = (value_actual + 1) WHERE achievement_id = (?) AND user_id = (?)', [achievementId, userId], function callback(error, results, fields) {
+                                                                                if (error != null) {
+                                                                                    console.log(error);
+                                                                                    return;
+                                                                                } else {
+                                                                                    console.log("7777777777777777777777777777");
+                                                                                    console.log("UPDATED");
+                                                                                    // do nothing after update, let the loop continue to update any other related acheivements
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    }
+                                                                }
+                                                            });
+                                                        }
+                                                    }
+
+                                                    // if no achievements were unlocked, send the response and end it
+                                                    res.send("Successfully updated grades and related achievements!");
+                                                    // once we have all achievements related to the quiz we just did 
+                                                    // #3 - query student_achievement to see if the user has an entry for those achievements of that specific subject (from #2)
+
+                                                }
+
+
+                                            })
+
+
+                                            // insert entry for those entries (from #3)
+                                            // IF they already exist, update them
+                                            // if the entry already has 'date_unlocked' then don't update it
+
+                                            // if date_unlocked is null
+                                            // update their value_actual
+
+                                            // if their actual_value is now equal to or greater than the value_goal
+                                            // set date_unlocked to the date
+                                            // update the user's achievement points by updating the user table
+
+
+                                        }
+                                    })
                                 }
                             })
-                            
                         }
                     });
                 }

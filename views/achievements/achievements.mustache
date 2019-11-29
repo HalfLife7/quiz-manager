@@ -9,23 +9,26 @@
 {{>navigationbaradmin}}
 {{/admin}}
 <main class="container" role="main">
-    <h1 class="capitalize mt-5 pt-5">User Profile</h1>
+    <h1 class="capitalize mt-5 pt-5">Achievements</h1>
     <h2>{{userInfo.firstName}} {{userInfo.lastName}}'s Achievements</h2>
 
+    {{#achievementData}}
     <div class="row featurette">
-        <div class="col-md-5 d-flex align-items-center justify-content-center">
-            <img id="profileImage" class="mx-auto" width="256" height="256" preserveAspectRatio="xMidYMid slice"
-                focusable="false" role="img" src="{{userData.profile_picture_path}}">
+        <div class="pt-5 pb-5 col-md-3 d-flex align-items-center justify-content-center">
+            <img id="achievementImage" class="mx-auto" width="200" height="200" preserveAspectRatio="xMidYMid slice"
+                focusable="false" role="img" src="{{image_path}}">
         </div>
-        <div class="col-md-7">
-            <h2 class="featurette-heading"></h2>
-            <p class="lead"></p>
+        <div class="pt-5 mt-4 col-md-9">
+            <h2 class="featurette-heading">{{name}}</h2>
+            <p class="lead">{{description}}</p>
             <div class="progress">
-                <div class="progress-bar" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0"
+                <div class="progress-bar" role="progressbar" style="width: {{value_percentage}}%" aria-valuenow="{{value_percentage}}" aria-valuemin="0"
                     aria-valuemax="100"></div>
             </div>
+            <p class="blockquote-footer">{{value_actual}}/{{value_goal}}</p>
         </div>
     </div>
+    {{/achievementData}}
 
     {{#notification}}
     <div id="notificationMessage" class="modal" tabindex="-1" role="dialog">
@@ -54,7 +57,7 @@
 
 <script>
     $(document).ready(function () {
-        $('#profileImage[src=""]').attr('src', '/images/defaultUserImage.png');
+        $('#achievementImage[src=""]').attr('src', '/images/defaultUserImage.png');
     });
 </script>
 

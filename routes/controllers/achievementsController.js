@@ -10,10 +10,11 @@ function checkLogin(req, res, next) {
     } else {
         res.locals.userInfo = req.session.userInfo;
         res.locals.homepageActive = "inactive";
-        res.locals.quizzesActive = "active";
+        res.locals.quizzesActive = "inactive";
+        res.locals.leaderboardActive = "inactive";
+        res.locals.achievementsActive = "active";
         next();
     }
-
 }
 router.use(checkLogin);
 
@@ -33,12 +34,26 @@ router.use(checkAccountType);
 
 // mysql
 var mysql = require('mysql');
-var pool  = mysql.createPool({
-  connectionLimit : 99,
+var pool = mysql.createPool({
+    connectionLimit: 99,
     host: 'localhost',
     user: 'root',
     password: 'admin',
     database: 'quizmanager'
 });
+
+router.get('/achievements', function (req, res) {
+    pool.query('SELECT student_achievement.*, achievement.* FROM student_achievement JOIN achievement ON student_achievement.achievement_id =achievement.achievement_id WHERE user_id = (?)', [req.session.userInfo.userId], function callback(error, results, fields) {
+        if (error != null) {
+            console.log(error);
+            return;
+        } else {
+            const achievementData = results;
+            console.log(achievementData);
+            res.render('achievements', { achievementData: achievementData });
+        }
+    })
+
+})
 
 module.exports = router;

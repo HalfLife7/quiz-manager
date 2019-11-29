@@ -63,11 +63,14 @@ const viewsPath = path.join(__dirname, '/views');
 const viewsPathLogin = path.join(__dirname, '/views/login');
 const viewsPathAccount = path.join(__dirname, '/views/account');
 const viewsPathQuiz = path.join(__dirname, '/views/quiz');
+const viewsPathAchievements = path.join(__dirname, '/views/achievements');
+const viewsPathLeaderboard = path.join(__dirname, '/views/leaderboard');
 const viewsPathManageQuiz = path.join(__dirname, '/views/manageQuiz');
+
 
 app.engine('mustache', mustacheExpress(viewsPath + '/partials', '.mustache'));
 app.set('view engine', 'mustache');
-app.set('views', [viewsPath, viewsPathLogin, viewsPathAccount, viewsPathQuiz, viewsPathManageQuiz]);
+app.set('views', [viewsPath, viewsPathLogin, viewsPathAccount, viewsPathQuiz, viewsPathManageQuiz, viewsPathAchievements, viewsPathLeaderboard]);
 
 // start session
 app.use(session({

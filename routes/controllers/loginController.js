@@ -70,7 +70,7 @@ router.post('/attemptlogin', function (req, res) {
         }
         // if the input was not valid, re-render the login page with an error message
       } else {
-        req.session.loginError = "Invalid password!";
+        req.session.loginError = "Incorrect password!";
         res.redirect("/");
       }
     }
