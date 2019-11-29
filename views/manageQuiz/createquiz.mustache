@@ -12,16 +12,16 @@
 <main class="container" role="main">
 <h1 class="mt-5 pt-5">Create Quiz</h1>
 <h2>Quiz Details</h2>
-<a class="btn btn-secondary" href="/manage/quizzes" role="button">Back</a>
-<button class="btn btn-primary" type="submit" form="createQuizForm">Create Quiz</button>
+<a class="btn btn-secondary mb-2" href="/manage/quizzes" role="button">Back</a>
+<button class="btn btn-primary mb-2" type="submit" form="createQuizForm">Create Quiz</button>
 <form id="createQuizForm" method="post" action="/manage/quizzes/create">
     <div class="form-group">
         <label for="name">Name</label>
-        <input type="text" class="form-control" name="name" id="name" placeholder="Quiz Name" value="{{quizData.name}}">
+        <input required type="text" class="form-control" name="name" id="name" placeholder="Quiz Name" value="{{quizData.name}}">
     </div>
     <div class="form-group">
         <label for="subject">Subject</label>
-        <select class="form-control" name="subject" id="subject">
+        <select required class="form-control" name="subject" id="subject">
             {{#subjectData}}
             <option>{{name}}</option>
             {{/subjectData}}
@@ -29,11 +29,11 @@
     </div>
     <div class="form-group">
         <label for="class">Class</label>
-        <input type="text" class="form-control" name="class" id="class" placeholder="Class Name">
+        <input required type="text" class="form-control" name="class" id="class" placeholder="Class Name">
     </div>
     <div class="form-group">
         <label for="description">Description</label>
-        <textarea class="form-control" name="description" id="description" rows="3" placeholder="Enter a short description about the quiz."></textarea>
+        <textarea required class="form-control" name="description" id="description" rows="3" placeholder="Enter a short description about the quiz."></textarea>
     </div>
 </form>
 </main>

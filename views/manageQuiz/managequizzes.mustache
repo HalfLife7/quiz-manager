@@ -11,7 +11,7 @@
 
 <main class="container" role="main">
 <h1 class="mt-5 pt-5">Manage Quizzes</h1>
-<a class="btn btn-secondary" href="/manage/quizzes/create" role="button">Create Quiz</a>
+<a class="btn btn-secondary mb-2" href="/manage/quizzes/create" role="button">Create Quiz</a>
 <table class="table table-hover">
     <thead>
         <tr>
@@ -63,6 +63,7 @@
 {{>scripts}}
 
 <script type="text/javascript">
+    // function to confirm if user really wants to delete a quiz
     $(document).ready(function () {
         // on click listener for delete button
         $('.delete-button').click(function () {
@@ -106,6 +107,7 @@
 </script>
 
 <script defer="defer">
+    // show any notification modals if one is passed in the view data
     $(window).on('load', function () {
         if (document.body.contains(document.getElementById("notificationMessage")) == true) {
             $("#notificationMessage").modal('show');

@@ -9,8 +9,10 @@ function checkLogin(req, res, next) {
         res.redirect('/');
     } else {
         res.locals.userInfo = req.session.userInfo;
-        res.locals.manageQuizzesActive = "active";
         res.locals.homepageActive = "inactive";
+        res.locals.leaderboardActive = "inactive";
+        res.locals.manageQuizzesActive = "active";
+        res.locals.statistics = "inactive";
         next();
     }
 
@@ -54,7 +56,9 @@ var pool  = mysql.createPool({
     database: 'quizmanager'
 });
 
-// all quizzes
+/**
+ * route to get all quizzes
+ */
 router.get('/manage/quizzes', function (req, res) {
     const notification = req.session.notification;
     req.session.notification = "";
@@ -69,7 +73,9 @@ router.get('/manage/quizzes', function (req, res) {
     })
 })
 
-// create a quiz
+/**
+ * route to create a new quiz
+ */
 router.get('/manage/quizzes/create', function (req, res) {
     // get all subjects to fill field
     pool.query("SELECT * FROM subject", function callback(error, results, fields) {
@@ -82,6 +88,9 @@ router.get('/manage/quizzes/create', function (req, res) {
     })
 })
 
+/**
+ * route for form to create a new quiz
+ */
 router.post('/manage/quizzes/create', function (req, res) {
     // console.log(req.body);
     pool.query("INSERT INTO quiz (name, description, subject_id, class, total_questions) VALUES (?,?,(SELECT subject_id FROM subject WHERE name = ?),?, 0)", [req.body.name, req.body.description, req.body.subject, req.body.class], function callback(error, results, fields) {
@@ -94,7 +103,9 @@ router.post('/manage/quizzes/create', function (req, res) {
     })
 })
 
-// read a quiz
+/**
+ * route to get details of a specific quiz
+ */
 router.get('/manage/quizzes/:id', function (req, res) {
     const notification = req.session.notification;
     req.session.notification = "";
@@ -130,7 +141,9 @@ router.get('/manage/quizzes/:id', function (req, res) {
     })
 })
 
-// update a quiz
+/**
+ * route for form to update details of a specific quiz
+ */
 router.post('/manage/quizzes/:id/edit', function (req, res) {
     // console.log(req.body);
     // console.log(req.params);
@@ -147,7 +160,9 @@ router.post('/manage/quizzes/:id/edit', function (req, res) {
     })
 })
 
-// delete a quiz
+/**
+ * route to delete a specific quiz
+ */
 router.delete('/manage/quizzes/:id/delete', function (req,res) {
     const quizId = req.params.id
     console.log(req.params.id);
@@ -161,4 +176,5 @@ router.delete('/manage/quizzes/:id/delete', function (req,res) {
     })
 })
 
+// export these routes up to routes.js
 module.exports = router;

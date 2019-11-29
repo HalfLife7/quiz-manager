@@ -1,28 +1,44 @@
 {{>header}}
 
-<h1>Registration Page</h1>
+</head>
 
-<form action="/registeruser" method="post">
-    <label for="email">Email:</label>
-    <input type="text" name="email"> <br />
-    <label for="password">Password:</label>
-    <input type="password" name="password"> <br />
-    <label for="confirmPassword">Confirm Password:</label>
-    <input type="password" name="confirmPassword"> <br />
-    <label for="firstName">First Name:</label>
-    <input type="text" name="firstName"> <br />
-    <label for="lastName">Last Name:</label>
-    <input type="text" name="lastName"> <br />
-    <label for="secretQuestion">Secret Question:</label>
-    <select name="secretQuestion" id="secretQuestion">
-        <option value="What is your favourite movie?">What is your favourite movie?</option>
-        <option value="What is your favourite fruit?">What is your favourite fruit?</option>
-    </select> <br />
-    <label for="secretAnswer">Secret Answer:</label>
-    <input type="text" name="secretAnswer"> <br />
-    <input type="submit" value="Register"> <br />
-</form>
-
-{{ errorMessage }}
-{{>scripts}}
-{{>footer}}
+<body>
+    <main class="container pt-5 mt-5" role="main">
+        <h1>Register</h1>
+        <form action="/registeruser" method="post">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input id="email" class="form-control" type="text" name="email" placeholder="email@domain.com" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input id="password" class="form-control" type="password" name="password" placeholder="Password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password:</label>
+                <input id="confirmPassword" class="form-control" type="password" name="confirmPassword" placeholder="Confirm Password" required>
+            </div>
+            <div class="form-group">
+                <label for="firstName">First Name:</label>
+                <input id="firstName" class="form-control" type="text" name="firstName" placeholder="First Name" required>
+            </div>
+            <div class="form-group">
+                <label for="lastName">Last Name:</label>
+                <input id="lastName" class="form-control" type="text" name="lastName" placeholder="Last Name" required>
+            </div>
+            <div class="form-group">
+                <label for="secretQuestion">Secret Question:</label>
+                <select class="form-control" name="secretQuestion" id="secretQuestion" required>
+                    <option value="What is your favourite movie?">What is your favourite movie?</option>
+                    <option value="What is your favourite fruit?">What is your favourite fruit?</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="secretAnswer">Secret Answer:</label>
+                <input id="secretAnswer" class="form-control" type="text" name="secretAnswer" placeholder="Secret Answer" required>
+            </div>
+            <input class="form-control" type="submit" value="Register">
+        </form>
+    </main>
+    {{>scripts}}
+    {{>footer}}

@@ -54,7 +54,9 @@ router.get('/', function (req, res) {
   }
 });
 
-// home page
+/**
+ * route to get homepage
+ */
 router.get('/homepage', function (req, res) {
   loginError = req.session.loginError;
   req.session.loginError = "";
@@ -137,4 +139,5 @@ router.get('/homepage', function (req, res) {
   }
 });
 
+// export these routes up to routes.js
 module.exports = router;

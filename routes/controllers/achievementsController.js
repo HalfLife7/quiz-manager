@@ -42,6 +42,9 @@ var pool = mysql.createPool({
     database: 'quizmanager'
 });
 
+/**
+ * route to get user achievements
+ */
 router.get('/achievements', function (req, res) {
     pool.query('SELECT student_achievement.*, achievement.* FROM student_achievement JOIN achievement ON student_achievement.achievement_id =achievement.achievement_id WHERE user_id = (?)', [req.session.userInfo.userId], function callback(error, results, fields) {
         if (error != null) {
@@ -56,4 +59,5 @@ router.get('/achievements', function (req, res) {
 
 })
 
+// export these routes up to routes.js
 module.exports = router;

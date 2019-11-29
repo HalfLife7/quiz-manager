@@ -30,16 +30,16 @@
     <form id="updatePassword" method="post" action="/account/settings/{{userInfo.userId}}/updatepassword">
         <div class="form-group">
             <label for="currentPassword">Current Password:</label>
-            <input type="password" class="form-control" name="currentPassword" id="currentPassword"
+            <input required type="password" class="form-control" name="currentPassword" id="currentPassword"
                 placeholder="Current Password">
         </div>
         <div class="form-group">
             <label for="newPassword">New Password:</label>
-            <input type="password" class="form-control" name="newPassword" id="newPassword" placeholder="New Password">
+            <input required type="password" class="form-control" name="newPassword" id="newPassword" placeholder="New Password">
         </div>
         <div class="form-group">
             <label for="confirmPassword">Confirm Password:</label>
-            <input type="password" class="form-control" name="confirmPassword" id="confirmPassword"
+            <input required type="password" class="form-control" name="confirmPassword" id="confirmPassword"
                 placeholder="Confirm Password">
         </div>
         <button class="btn btn-primary" id="submitButton" type="submit">Update Password</button>
@@ -72,6 +72,7 @@
 {{>scripts}}
 
 <script defer="defer">
+    // show any notification modals if one is passed in the view data
     $(window).on('load', function () {
         if (document.body.contains(document.getElementById("notificationMessage")) == true) {
             $("#notificationMessage").modal('show');

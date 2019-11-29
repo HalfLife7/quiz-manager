@@ -10,8 +10,10 @@ function checkLogin(req, res, next) {
         res.redirect('/');
     } else {
         res.locals.userInfo = req.session.userInfo;
-        res.locals.homepageActive = "inactive";
-        res.locals.quizzesActive = "active";
+        res.locals.homepageActive = "active";
+        res.locals.quizzesActive = "inactive";
+        res.locals.leaderboardActive = "inactive";
+        res.locals.achievementsActive = "inactive";
         next();
     }
 
@@ -45,7 +47,9 @@ var pool  = mysql.createPool({
 var multer = require('multer');
 var path = require('path')
 
-
+/**
+ * route for user profile
+ */
 router.get('/account/profile/:userId', function (req, res) {
     const notification = req.session.notification;
     req.session.notification = "";
@@ -99,6 +103,9 @@ function checkFileType(file, callback) {
     }
 }
 
+/**
+ * route form form to update user profile
+ */
 router.post('/account/profile/:userId/update', function (req, res) {
     const userId = req.params.userId;
     upload(req, res, function (err) {
@@ -140,6 +147,9 @@ router.post('/account/profile/:userId/update', function (req, res) {
     });
 })
 
+/**
+ * route to get user settings
+ */
 router.get('/account/settings/:userId', function (req, res) {
     const notification = req.session.notification;
     req.session.notification = "";
@@ -163,6 +173,9 @@ router.get('/account/settings/:userId', function (req, res) {
     })
 })
 
+/**
+ * route for form to update user settings
+ */
 router.post('/account/settings/:userId/updatesettings', function (req, res) {
     console.log(req.body);
     const userId = req.params.userId;
@@ -190,6 +203,9 @@ router.post('/account/settings/:userId/updatesettings', function (req, res) {
     });
 })
 
+/**
+ * route for form to update user password
+ */
 router.post('/account/settings/:userId/updatepassword', function (req, res) {
     const userId = req.params.userId;
     var currentPassword = req.body.currentPassword;
@@ -233,4 +249,5 @@ router.post('/account/settings/:userId/updatepassword', function (req, res) {
     });
 })
 
+// export these routes up to routes.js
 module.exports = router;

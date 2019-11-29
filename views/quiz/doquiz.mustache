@@ -11,7 +11,7 @@
 
 <main class="container" role="main">
     <h1 class="mt-5 pt-5">Quiz - {{quizData.name}}</h1>
-    <a class="btn btn-secondary" style="display:none;" id="returnHomeButton" href="/homepage" role="button">Return to Homepage</a>
+    <a class="btn btn-secondary mb-2" style="display:none;" id="returnHomeButton" href="/homepage" role="button">Return to Homepage</a>
     <h2 id="subTitle">Quiz Details</h2>
     <button class="btn btn-primary" id="checkSubmissionButton" form="quizAttemptForm">Check Submission</button>
     <button class="btn btn-primary" id="submitButton">Submit Quiz</button>
@@ -78,13 +78,13 @@
     const quizId = $("#quizId").val();
     const userId = $("#userId").val();
     const totalQuestions = $('.answer-group').length;
-
+    
     $(document).ready(function () {
+        // function to populate the answers
         $('.answer-group').each(function (index, object) {
             const questionId = $(object).attr('id').split('-')[1];
 
             let questionNumber = index + 1;
-            //console.log(questionId);
             $.ajax({
                 url: '/subjects/quizzes/' + quizId + '/test/' + questionId,
                 type: 'GET',
@@ -93,13 +93,8 @@
 
                     for (i = 0; i < answerData.length; i++) {
                         let answerNumber = i + 1;
-                        //console.log(answerData.length);
-                        //console.log(i);
-                        //console.log(answerData[i]);
                         var answerRow = [];
                         var questionAnswerId = answerData[i]["question_answer_id"];
-                        //console.log(questionAnswerId);
-                        //answerRow.push('<input type="hidden" name="question' + questionNumber + 'AnswerId" id="question' + questionNumber + 'AnswerId" value="' + questionAnswerId + '">');
                         answerRow.push('<div class="form-check">');
                         answerRow.push('<input class="form-check-input" required type="radio"name="question' + questionNumber + 'AnswerId" id="question' + questionNumber + 'answer' + answerNumber + '" value="' + questionAnswerId + '">');
                         answerRow.push('<label class="form-check-label" for="question' + questionNumber + 'answer' + answerNumber + '" >' + answerData[i].answer_text + '</label>');
@@ -111,13 +106,16 @@
             })
         });
 
-        // on click listener for submit button
+        // function for when user submits quiz
+        // get user confirmation for quiz submission
+        // 2 AJAX calls
+        // first call to mark the questions and get total correct answeres
+        // second call to send grade back to server
         $('#submitButton').click(function () {
             var questionIdArray = {};
-            // show modal to confirm if they really do want to delete
             bootbox.confirm("Are you sure you want to submit your quiz?", function (result) {
                 if (result == true) {
-                    //console.log(result);
+                    // console.log(result);
                     // if they confirm, ajax request to hide the submit button to prevent multiple submissions
                     $('#submitButton').hide();
                     $('#checkSubmissionButton').hide();
@@ -125,13 +123,10 @@
                     // set data to send
                     for (i = 0; i < totalQuestions; i++) {
                         let answerNumber = i + 1;
-                        // $('input[name=name_of_your_radiobutton]:checked').val();
                         let inputQuestion = $('input[name="question' + answerNumber + 'Id"]').val();
                             questionIdArray["id"+answerNumber] = inputQuestion;
                             console.log(questionIdArray);
                     }
-
-
 
                     $.ajax({
                         url: '/subjects/quizzes/' + quizId + '/test/submitquiz',
@@ -148,7 +143,6 @@
 
                             for (i = 0; i < correctAnswerData.length; i++) {
                                 let answerNumber = i + 1;
-                                // $('input[name=name_of_your_radiobutton]:checked').val();
                                 let inputAnswer = $('input[name="question' + answerNumber + 'AnswerId"]:checked').val();
 
                               //console.log(inputAnswer)
@@ -175,15 +169,14 @@
                                 }
 
                             }
-                          //console.log(totalCorrect);
-                          //console.log(userId);
+
                             var updateData = {
                                 totalCorrect: totalCorrect,
                                 userId: userId,
                                 totalQuestions: totalQuestions
                             }
-                          //console.log(updateData);
 
+                            // create quiz summary then update page to show user
                             const percentScore = ((totalCorrect / totalQuestions) * 100);
                             summary = [];
                             summary.push('<div class="jumbotron">');
@@ -192,6 +185,7 @@
                             summary.push('<p class="lead">You got ' + totalCorrect + '/' + totalQuestions + ' correct! (' + percentScore.toFixed(2) + '%) </p>');
                             summary.push('</div></div>');
                             $("#subTitle").before(summary.join(''));
+
                             // send another AJAX request with
                             // user_id, quiz_id, and score to update db
                             // update page with feedback
@@ -206,13 +200,13 @@
                         }
                     })
                 }
-
             })
         })
     });
 </script>
 
 <script defer="defer">
+    // show any notification modals if one is passed in the view data
     $(window).on('load', function () {
         if (document.body.contains(document.getElementById("notificationMessage")) == true) {
             $("#notificationMessage").modal('show');

@@ -9,8 +9,10 @@ function checkLogin(req, res, next) {
         res.redirect('/');
     } else {
         res.locals.userInfo = req.session.userInfo;
-        res.locals.manageQuizzesActive = "active";
         res.locals.homepageActive = "inactive";
+        res.locals.leaderboardActive = "inactive";
+        res.locals.manageQuizzesActive = "active";
+        res.locals.statistics = "inactive";
         next();
     }
 
@@ -55,7 +57,9 @@ var pool  = mysql.createPool({
     multipleStatements: true
 });
 
-// get create quiz question page
+/**
+ * route to create a quiz question
+ */
 router.get('/manage/quizzes/:quizId/question/create', function (req, res) {
     quizId = req.params.quizId
     pool.query("SELECT * FROM quiz WHERE quiz_id = (?)", quizId, function callback(error, results, fields) {
@@ -69,7 +73,9 @@ router.get('/manage/quizzes/:quizId/question/create', function (req, res) {
 
 })
 
-// create a quiz question form
+/**
+ * route for form to submit new quiz question
+ */
 router.post('/manage/quizzes/:quizId/question/create', function (req, res) {
     const quizId = req.params.quizId;
     console.log(req.body);
@@ -168,7 +174,9 @@ router.post('/manage/quizzes/:quizId/question/create', function (req, res) {
 
 })
 
-// read a quiz question - details of one question
+/**
+ * route to get specific quiz question
+ */
 router.get('/manage/quizzes/:quizId/question/:questionId', function (req, res) {
     const quizId = req.params.quizId;
     const questionId = req.params.questionId
@@ -218,7 +226,9 @@ router.get('/manage/quizzes/:quizId/question/:questionId', function (req, res) {
     })
 })
 
-// update a quiz question
+/**
+ * route to update specific quiz question
+ */
 router.post('/manage/quizzes/:quizId/question/:questionId/edit', function (req, res) {
     const quizId = req.params.quizId
     const questionId = req.params.questionId
@@ -315,7 +325,9 @@ router.post('/manage/quizzes/:quizId/question/:questionId/edit', function (req, 
     })
 })
 
-// delete a quiz question
+/**
+ * route to delete quiz question
+ */
 router.delete('/manage/quizzes/:quizId/question/:questionId/delete', function (req, res) {
     const quizId = req.params.quizId
     const questionId = req.params.questionId
@@ -347,4 +359,5 @@ router.delete('/manage/quizzes/:quizId/question/:questionId/delete', function (r
     })
 })
 
+// export these routes up to routes.js
 module.exports = router;

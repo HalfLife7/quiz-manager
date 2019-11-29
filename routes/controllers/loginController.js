@@ -13,12 +13,18 @@ var pool  = mysql.createPool({
   database: 'quizmanager'
 });
 
+/**
+ * route to logout
+ */
 router.get('/logout', function (req, res) {
   // clear session data and redirect them to the loginpage
   req.session.destroy();
   res.redirect('/');
 })
 
+/**
+ * route for form to login
+ */
 router.post('/attemptlogin', function (req, res) {
   console.log(req.body);
 
@@ -78,6 +84,9 @@ router.post('/attemptlogin', function (req, res) {
 
 })
 
+/**
+ * route to get register page
+ */
 router.get('/register', function (req, res) {
   registerError = req.session.registerError;
   req.session.registerError = "";
@@ -85,6 +94,9 @@ router.get('/register', function (req, res) {
   res.render("register", { errorMessage: registerError });
 })
 
+/**
+ * route for form to register new account
+ */
 router.post('/registeruser', function (req, res) {
   console.log(req.body);
 
@@ -124,6 +136,9 @@ router.post('/registeruser', function (req, res) {
   }
 })
 
+/**
+ * route to start forgot password process
+ */
 router.get('/forgotpassword', function (req, res) {
   forgotPasswordError = req.session.forgotPasswordError;
   req.session.forgotPasswordError = "";
@@ -170,6 +185,9 @@ router.post('/forgotpasswordconfirmemail', function (req, res) {
   });
 });
 
+/**
+ * route to confirm secret answer for 'forgot password process'
+ */
 router.get('/secretanswer', function (req, res) {
   secretAnswerError = req.session.secretAnswerError;
   req.session.secretAnswerError = "";
@@ -182,6 +200,9 @@ router.get('/secretanswer', function (req, res) {
   }
 })
 
+/**
+ * route for form to confirm secret answer
+ */
 router.post('/forgotpasswordconfirmsecretanswer', function (req, res) {
   console.log(req.body);
   // if they enter the correct scret answer, send them to update their password
@@ -195,6 +216,9 @@ router.post('/forgotpasswordconfirmsecretanswer', function (req, res) {
   }
 })
 
+/**
+ * route to get update password for 'forgot password process'
+ */
 router.get('/updatepassword', function (req, res) {
   console.log(req.session);
   updatePasswordError = req.session.updatePasswordError;
@@ -208,6 +232,9 @@ router.get('/updatepassword', function (req, res) {
   }
 })
 
+/**
+ * route for form to update password
+ */
 router.post('/forgotpasswordupdatepassword', function (req, res) {
   console.log(req.body);
   // update the password of the user
@@ -251,4 +278,5 @@ router.post('/forgotpasswordupdatepassword', function (req, res) {
 
 })
 
+// export these routes up to routes.js
 module.exports = router;

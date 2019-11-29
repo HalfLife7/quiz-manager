@@ -42,6 +42,9 @@ var pool = mysql.createPool({
     database: 'quizmanager'
 });
 
+/**
+ * route to get leaderboard
+ */
 router.get('/leaderboard', function (req, res) {
     pool.query('SELECT first_name, last_name, nickname, leaderboard_opt_in, leaderboard_use_nickname, achievement_points, account_type, profile_picture_path FROM user WHERE account_type = (?) ORDER BY achievement_points DESC', ["student", req.session.userInfo.userId], function callback(error, results, fields) {
         if (error != null) {
@@ -73,10 +76,13 @@ router.get('/leaderboard', function (req, res) {
             for (i = 0; i < userData.length; i++) {
                 userData[i].rank = (i + 1);
             }
+
+            console.log(userData);
             res.render('leaderboard', { userData: userData });
         }
     })
 
 })
 
+// export these routes up to routes.js
 module.exports = router;

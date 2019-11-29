@@ -42,6 +42,9 @@ var pool = mysql.createPool({
     database: 'quizmanager'
 });
 
+/**
+ * route to get all subjects
+ */
 router.get('/quizzes/subjects', function (req, res) {
     // get all subjects
     pool.query("SELECT * FROM subject", function callback(error, results, fields) {
@@ -55,6 +58,9 @@ router.get('/quizzes/subjects', function (req, res) {
     });
 })
 
+/**
+ * route to get all quizzes for a specific subject
+ */
 router.get('/quizzes/subjects/:subject', function (req, res) {
     console.log(req.params);
     var subject = req.params.subject;
@@ -71,6 +77,9 @@ router.get('/quizzes/subjects/:subject', function (req, res) {
     });
 })
 
+/**
+ * route to get specific quiz for testing
+ */
 router.get('/subjects/quizzes/:quizId/test', function (req, res) {
     console.log(req.session.userInfo);
     const quizId = req.params.quizId
@@ -93,39 +102,16 @@ router.get('/subjects/quizzes/:quizId/test', function (req, res) {
                     for (i = 0; i < questionData.length; i++) {
                         questionData[i]["questionNumber"] = i + 1;
                     }
-
-
                     res.render('doquiz', { quizData: quizData, quizQuestionsData: questionData });
-
-                    // // get all questions
-                    // var query = "SELECT * FROM question_answer WHERE question_id in (?)"
-                    // var queryData = [questionNumbers];
-
-                    // pool.query(query, queryData, function callback(error,results, fields) {
-                    //     if (error != null) {
-                    //         console.log(error);
-                    //     } else {
-                    //         const answerData = results;
-                    //         console.log(answerData);
-                    //         console.log("before");
-                    //         console.log(questionData);
-                    //         for (i = 0 ; i < answerData.length; i++) {
-                    //             for (j = 0; j < questionNumbers.length; j++) {
-                    //                 if (answerData[i].question_id == questionNumbers[j]) {
-                    //                     questionData[j].push(answerData[i]);
-                    //                 }
-                    //             }
-                    //         }
-                    //         console.log("after");
-                    //         console.log(questionData);
-                    //     }
-                    // })
                 }
             });
         }
     });
 })
 
+/**
+ * route to get answers to populate quiz page
+ */
 router.get('/subjects/quizzes/:quizId/test/:questionId', function (req, res) {
     const quizId = req.params.quizId;
     const questionId = req.params.questionId;
@@ -142,6 +128,9 @@ router.get('/subjects/quizzes/:quizId/test/:questionId', function (req, res) {
     })
 });
 
+/**
+ * route to get answer data for each quiz question - used by AJAX call to mark answers
+ */
 router.post('/subjects/quizzes/:quizId/test/submitquiz', function (req, res) {
 
     // store JSON values into array (containing the question IDs)
@@ -158,15 +147,15 @@ router.post('/subjects/quizzes/:quizId/test/submitquiz', function (req, res) {
         } else {
             const answerData = results;
             console.log(answerData);
-
             // send the answers
             res.send(answerData);
         }
     })
-
-
 })
 
+/**
+ * route for form to update grades after marking has complete on quiz page
+ */
 router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
     const totalCorrect = req.body.totalCorrect;
     const totalQuestions = req.body.totalQuestions;
@@ -182,12 +171,13 @@ router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
             return;
         } else {
             // update quiz statistics
-            pool.query("UPDATE quiz SET average = (SELECT AVG(grade_value) FROM student_grade WHERE quiz_id = (?)), total_attempts = (total_attempts + 1)", [quizId], function callback(error, results, fields) {
+            pool.query("UPDATE quiz SET average = (SELECT AVG(grade_value) FROM student_grade WHERE quiz_id = (?)), total_attempts = (total_attempts + 1) WHERE quiz_id = (?)", [quizId, quizId], function callback(error, results, fields) {
                 if (error != null) {
                     console.log(error);
                     return;
                 } else {
-                    // update student quiz statistics
+                    // insert new entry into student quiz stats (if its their first time progressing on a set of achievements)
+                    // OTHERWISE update the existing entries
                     pool.query("INSERT INTO student_quiz_statistics (user_id, quiz_id, subject_id, total_attempts, max_grade, min_grade, average_grade) VALUES(?,?,(SELECT subject_id FROM quiz WHERE quiz_id = ?),(SELECT total_attempts FROM quiz WHERE quiz_id = (?)),(SELECT MAX(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)),(SELECT MIN(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)),(SELECT AVG(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?))) ON DUPLICATE KEY UPDATE subject_id = (SELECT subject_id FROM quiz WHERE quiz_id = ?), total_attempts = (total_attempts + 1), max_grade = (SELECT MAX(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)), min_grade = (SELECT MIN(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)), average_grade = (SELECT AVG(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?))", [userId, quizId, quizId, quizId, userId, quizId, userId, quizId, userId, quizId, quizId, userId, quizId, userId, quizId, userId, quizId], function callback(error, results, fields) {
                         if (error != null) {
                             console.log(error);
@@ -216,21 +206,19 @@ router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
                                             }
                                             console.log("total attempts " + subjectTotalAttempts);
                                             console.log("subject id " + quizSubjectId);
-
+                                            
                                             // #2 - query achievements and get the achievements related to this subject
                                             pool.query('SELECT * FROM achievement WHERE subject_id = (?)', [quizSubjectId], function callback(error, results, fields) {
                                                 if (error != null) {
                                                     console.log(error);
                                                     return;
                                                 } else {
-
                                                     const relatedAchievements = results;
                                                     console.log(relatedAchievements);
                                                     for (i = 0; i < relatedAchievements.length; i++) {
                                                         if (relatedAchievements[i].subject_id == quizSubjectId) {
                                                             const achievementId = relatedAchievements[i].achievement_id;
                                                             const achievementValueGoal = relatedAchievements[i].value_goal;
-
                                                             // go through achievements related to the subject we just completed
                                                             pool.query('SELECT * FROM student_achievement WHERE achievement_id = (?) and user_id = (?)', [achievementId, userId], function callback(error, results, fields) {
                                                                 if (error != null) {
@@ -239,7 +227,6 @@ router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
                                                                 } else {
                                                                     // if there is no entry for this achievement yet, add it
                                                                     console.log(results);
-                                                                    console.log("3333333333333333333333333333333333333");
                                                                     if (results.length == 0) {
                                                                         pool.query('INSERT INTO student_achievement (user_id, achievement_id, value_actual, value_goal) VALUES(?,?,?,?)', [userId, achievementId, 1, achievementValueGoal], function callback(error, results, fields) {
                                                                             if (error != null) {
@@ -252,7 +239,6 @@ router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
                                                                     } else {
                                                                         const actualAchievement = results[0];
                                                                         console.log(actualAchievement);
-                                                                        console.log("222222222222222222222222");
                                                                         // if there is already an entry for this achievement, update it IF it isnt already unlocked
                                                                         if (actualAchievement.unlocked != null) {
                                                                             // do nothing if its already unlocked (will be null if it isnt unlocked)
@@ -264,8 +250,6 @@ router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
                                                                                     console.log(error);
                                                                                     return;
                                                                                 } else {
-                                                                                    console.log("7777777777777777777777777777");
-                                                                                    console.log("UPDATED");
                                                                                     // do nothing after update, let the loop continue to update any other related acheivements
                                                                                 }
                                                                             });
@@ -275,30 +259,10 @@ router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
                                                             });
                                                         }
                                                     }
-
                                                     // if no achievements were unlocked, send the response and end it
                                                     res.send("Successfully updated grades and related achievements!");
-                                                    // once we have all achievements related to the quiz we just did 
-                                                    // #3 - query student_achievement to see if the user has an entry for those achievements of that specific subject (from #2)
-
                                                 }
-
-
                                             })
-
-
-                                            // insert entry for those entries (from #3)
-                                            // IF they already exist, update them
-                                            // if the entry already has 'date_unlocked' then don't update it
-
-                                            // if date_unlocked is null
-                                            // update their value_actual
-
-                                            // if their actual_value is now equal to or greater than the value_goal
-                                            // set date_unlocked to the date
-                                            // update the user's achievement points by updating the user table
-
-
                                         }
                                     })
                                 }
@@ -311,4 +275,5 @@ router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
     })
 })
 
+// export these routes up to routes.js
 module.exports = router;

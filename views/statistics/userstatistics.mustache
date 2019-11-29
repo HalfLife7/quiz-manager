@@ -9,27 +9,29 @@
 {{>navigationbaradmin}}
 {{/admin}}
 <main class="container" role="main">
-<h1 class="capitalize mt-5 pt-5">{{subjectData}} Quizzes</h1>
+<h1 class="capitalize mt-5 pt-5">User Statistics</h1>
 <table class="table table-hover">
     <thead>
         <tr>
-            <th scope="col">Quiz Name</th>
-            <th scope="col">Description</th>
-            <th scope="col">Class</th>
-            <th scope="col">Total Questions</th>
-            <th scope="col">Action</th>
+            <th scope="col">First Name</th>
+            <th scope="col">Last Name</th>
+            <th scope="col">Nickname</th>
+            <th scope="col">Average</th>
+            <th scope="col">Achievement Points</th>
+            <th scope="col">Last Date Active</th>
         </tr>
     </thead>
     <tbody>
-        {{#quizData}}
-        <tr id="row-quiz-{{quiz_id}}">
-            <td>{{name}}</td>
-            <td>{{description}}</td>
-            <td>{{class}}</td>
-            <td>{{total_questions}}</td>
-            <td><a class="btn btn-primary edit-button" href="/subjects/quizzes/{{quiz_id}}/test" role="button">Start</a></td>
+        {{#userData}}
+        <tr id="row-user-{{user_id}}">
+            <td>{{first_name}}</td>
+            <td>{{last_name}}</td>
+            <td>{{nickname}}</td>
+            <td>{{average_grade}}</td>
+            <td>{{achievement_points}}</td>
+            <td>{{last_date_active}}</td>
         </tr>
-        {{/quizData}}
+        {{/userData}}
     </tbody>
 </table>
 

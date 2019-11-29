@@ -69,12 +69,14 @@
 {{>scripts}}
 
 <script>
+    // loads a default profile image if the user hasn't set one
     $(document).ready(function(){
         $('#profileImage[src=""]').attr('src', '/images/defaultUserImage.png');
     });
 </script>
 
 <script defer="defer">
+    // show any notification modals if one is passed in the view data
     $(window).on('load', function () {
         if (document.body.contains(document.getElementById("notificationMessage")) == true) {
             $("#notificationMessage").modal('show');
