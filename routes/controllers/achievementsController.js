@@ -48,7 +48,7 @@ var pool = mysql.createPool({
 router.get('/achievements', function (req, res) {
     pool.query('SELECT student_achievement.*, achievement.* FROM student_achievement JOIN achievement ON student_achievement.achievement_id =achievement.achievement_id WHERE user_id = (?)', [req.session.userInfo.userId], function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
             return;
         } else {
             const achievementData = results;

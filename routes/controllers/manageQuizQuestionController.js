@@ -65,7 +65,8 @@ router.get('/manage/quizzes/:quizId/question/create', function (req, res) {
     pool.query("SELECT * FROM quiz WHERE quiz_id = (?)", quizId, function callback(error, results, fields) {
         const quizData = results[0];
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             res.render('createquestion', { quizData: quizData });
         }
@@ -132,12 +133,14 @@ router.post('/manage/quizzes/:quizId/question/create', function (req, res) {
     // insert question into database
     pool.query("INSERT INTO question (quiz_id, text, type) VALUES (?,?,?)", [quizId, questionData.questionText, questionData.questionType], function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             // get the question_id of the newly inserted question
             pool.query("SELECT MAX(question_id) AS question_id FROM question ", function callback(error, results, fields) {
                 if (error != null) {
-                    console.log(error);
+                    console.error(error);
+                    return;
                 } else {
                     console.log(results);
                     // add the question id to array of arrays for bulk sql insert
@@ -152,12 +155,14 @@ router.post('/manage/quizzes/:quizId/question/create', function (req, res) {
                     // bulk insert answers into database
                     pool.query(sql, [answerData], function callback(error, results, fields) {
                         if (error != null) {
-                            console.log(error);
+                            console.error(error);
+                            return;
                         } else {
                             // update the total question count for the quiz
                             pool.query('UPDATE quiz SET total_questions = (SELECT COUNT(quiz_id) FROM question WHERE quiz_id = ?) where quiz_id = (?)', [quizId, quizId], function callback(error, results, fields) {
                                 if (error != null) {
-                                    console.log(error);
+                                    console.error(error);
+                                    return;
                                 } else {
                                     console.log(results);
                                     // redirect to edit quiz page with notification
@@ -183,7 +188,8 @@ router.get('/manage/quizzes/:quizId/question/:questionId', function (req, res) {
     // get question details
     pool.query("SELECT * FROM question where (question_id = ?) AND (quiz_id = ?)", [questionId, quizId], function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             // console.log(results[0]);
             const questionData = results[0];
@@ -199,7 +205,8 @@ router.get('/manage/quizzes/:quizId/question/:questionId', function (req, res) {
             // get answers for that question
             pool.query("SELECT * FROM question_answer where question_id = ?", questionId, function callback(error, results, fields) {
                 if (error != null) {
-                    console.log(error);
+                    console.error(error);
+                    return;
                 } else {
                     // console.log(results);
                     let questionAnswersData = results;
@@ -301,7 +308,8 @@ router.post('/manage/quizzes/:quizId/question/:questionId/edit', function (req, 
     // update question in database
     pool.query("UPDATE question SET text = ? WHERE question_id = ? AND quiz_id = ?", [questionData.questionText, questionId, quizId], function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             // build query string to complete bulk update
             let queries = '';
@@ -312,7 +320,8 @@ router.post('/manage/quizzes/:quizId/question/:questionId/edit', function (req, 
             // bulk insert answers into database
             pool.query(queries, [answerData], function callback(error, results, fields) {
                 if (error != null) {
-                    console.log(error);
+                    console.error(error);
+                    return;
                 } else {
                     //console.log(results);
 
@@ -335,18 +344,21 @@ router.delete('/manage/quizzes/:quizId/question/:questionId/delete', function (r
     // delete answers tied to that question first
     pool.query("DELETE FROM question_answer WHERE question_id = (?)", [questionId], function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             console.log(results);
             // then delete the question
             pool.query("DELETE FROM question WHERE question_id = (?)", [questionId], function callback(error, results, fields) {
                 if (error != null) {
-                    console.log(error);
+                    console.error(error);
+                    return;
                 } else {
                     // update the total question count for the quiz
                     pool.query('UPDATE quiz SET total_questions = (SELECT COUNT(quiz_id) FROM question WHERE quiz_id = ?) where quiz_id = (?)', [quizId, quizId], function callback(error, results, fields) {
                         if (error != null) {
-                            console.log(error);
+                            console.error(error);
+                            return;
                         } else {
                             console.log(results);
                             // send response back to page for AJAX request to show success modal

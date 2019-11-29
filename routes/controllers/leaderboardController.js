@@ -48,7 +48,7 @@ var pool = mysql.createPool({
 router.get('/leaderboard', function (req, res) {
     pool.query('SELECT first_name, last_name, nickname, leaderboard_opt_in, leaderboard_use_nickname, achievement_points, account_type, profile_picture_path FROM user WHERE account_type = (?) ORDER BY achievement_points DESC', ["student", req.session.userInfo.userId], function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
             return;
         } else {
             let userData = results;

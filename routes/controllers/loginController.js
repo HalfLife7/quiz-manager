@@ -30,7 +30,8 @@ router.post('/attemptlogin', function (req, res) {
 
   pool.query("SELECT * FROM user WHERE email = ?", req.body.email, function callback(error, results, fields) {
     if (error != null) {
-      console.log(error);
+      console.error(error);
+      return;
     } else {
       console.log(results[0]);
 
@@ -106,11 +107,13 @@ router.post('/registeruser', function (req, res) {
 
     pool.query("INSERT into user (email, password, account_type, first_name, last_name, secret_question, secret_answer) VALUES (?,?,?,?,?,?,?)", [req.body.email, hashedPassword, "student", req.body.firstName, req.body.lastName, req.body.secretQuestion, req.body.secretAnswer], function callback(error, results, fields) {
       if (error != null) {
-        console.log(error)
+        console.error(error);
+        return;
       } else {
         pool.query("SELECT user_id FROM user where email = (?)", req.body.email, function callback(error, results, fields) {
           if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
           } else {
             req.session.student = "true";
             req.session.loggedIn = "true";
@@ -150,7 +153,8 @@ router.post('/forgotpasswordconfirmemail', function (req, res) {
 
   pool.query("SELECT * FROM user WHERE email = ?", req.body.email, function callback(error, results, fields) {
     if (error != null) {
-      console.log(error);
+      console.error(error);
+      return;
     } else {
       console.log(results[0]);
 
@@ -245,7 +249,8 @@ router.post('/forgotpasswordupdatepassword', function (req, res) {
 
     pool.query("UPDATE user SET password = (?) WHERE email = ?", [hashedPassword, req.session.forgotPassword.email], function callback(error, results, fields) {
       if (error != null) {
-        console.log(error)
+        console.error(error);
+        return;
       } else {
         if (req.session.userInfo.accountType == "administrator") {
           req.session.admin = "true";

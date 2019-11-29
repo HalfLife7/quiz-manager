@@ -49,7 +49,8 @@ router.get('/quizzes/subjects', function (req, res) {
     // get all subjects
     pool.query("SELECT * FROM subject", function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             var subjects = results
 
@@ -67,7 +68,8 @@ router.get('/quizzes/subjects/:subject', function (req, res) {
     // get all subjects
     pool.query("SELECT * FROM quiz WHERE subject_id = (SELECT subject_id FROM subject where name = ?)", subject, function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             console.log(results);
             var quizzes = results
@@ -86,7 +88,8 @@ router.get('/subjects/quizzes/:quizId/test', function (req, res) {
     // get quiz data
     pool.query("SELECT * FROM quiz WHERE quiz_id = ?", quizId, function callback(error, results, fields) {
         if (error != null) {
-            //console.log(error);
+            console.error(error);
+            return;
         } else {
             const quizData = results[0]
             //console.log(quizData);
@@ -94,7 +97,8 @@ router.get('/subjects/quizzes/:quizId/test', function (req, res) {
 
             pool.query("SELECT * FROM question WHERE quiz_id = ?", quizId, function callback(error, results, fields) {
                 if (error != null) {
-                    //console.log(error);
+                    console.error(error);
+                    return;
                 } else {
                     let questionData = results;
                     //console.log(questionData);
@@ -118,7 +122,8 @@ router.get('/subjects/quizzes/:quizId/test/:questionId', function (req, res) {
     // get answers
     pool.query('SELECT question_answer_id, answer_text FROM question_answer WHERE question_id = (?)', [questionId], function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             const answerData = results;
 
@@ -143,7 +148,8 @@ router.post('/subjects/quizzes/:quizId/test/submitquiz', function (req, res) {
 
     pool.query(query, queryData, function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             const answerData = results;
             console.log(answerData);
@@ -167,33 +173,33 @@ router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
     // update student grades
     pool.query("INSERT INTO student_grade (user_id, quiz_id, grade_value, percent_value) VALUES (?,?,?,?)", [userId, quizId, totalCorrect, ((totalCorrect / totalQuestions) * 100)], function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
             return;
         } else {
             // update quiz statistics
             pool.query("UPDATE quiz SET average = (SELECT AVG(grade_value) FROM student_grade WHERE quiz_id = (?)), total_attempts = (total_attempts + 1) WHERE quiz_id = (?)", [quizId, quizId], function callback(error, results, fields) {
                 if (error != null) {
-                    console.log(error);
+                    console.error(error);
                     return;
                 } else {
                     // insert new entry into student quiz stats (if its their first time progressing on a set of achievements)
                     // OTHERWISE update the existing entries
                     pool.query("INSERT INTO student_quiz_statistics (user_id, quiz_id, subject_id, total_attempts, max_grade, min_grade, average_grade) VALUES(?,?,(SELECT subject_id FROM quiz WHERE quiz_id = ?),(SELECT total_attempts FROM quiz WHERE quiz_id = (?)),(SELECT MAX(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)),(SELECT MIN(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)),(SELECT AVG(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?))) ON DUPLICATE KEY UPDATE subject_id = (SELECT subject_id FROM quiz WHERE quiz_id = ?), total_attempts = (total_attempts + 1), max_grade = (SELECT MAX(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)), min_grade = (SELECT MIN(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?)), average_grade = (SELECT AVG(percent_value) FROM student_grade WHERE user_id = (?) AND quiz_id = (?))", [userId, quizId, quizId, quizId, userId, quizId, userId, quizId, userId, quizId, quizId, userId, quizId, userId, quizId, userId, quizId], function callback(error, results, fields) {
                         if (error != null) {
-                            console.log(error);
+                            console.error(error);
                             return;
                         } else {
                             // get subject_id of the quiz that was just submitted
                             pool.query('SELECT subject_id from quiz WHERE quiz_id = (?)', [quizId], function callback(error, results, fields) {
                                 if (error != null) {
-                                    console.log(error);
+                                    console.error(error);
                                     return;
                                 } else {
                                     const quizSubjectId = results[0].subject_id;
                                     // check for achievement unlock
                                     pool.query('SELECT student_quiz_statistics.*, subject.*, (SELECT subject_id FROM quiz WHERE quiz_id = (?)) AS tracked_subject_id FROM student_quiz_statistics JOIN subject ON student_quiz_statistics.subject_id = subject.subject_id WHERE user_id = (?) ', [quizId, userId], function callback(error, results, fields) {
                                         if (error != null) {
-                                            console.log(error);
+                                            console.error(error);
                                             return;
                                         } else {
                                             console.log(results);
@@ -210,7 +216,7 @@ router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
                                             // #2 - query achievements and get the achievements related to this subject
                                             pool.query('SELECT * FROM achievement WHERE subject_id = (?)', [quizSubjectId], function callback(error, results, fields) {
                                                 if (error != null) {
-                                                    console.log(error);
+                                                    console.error(error);
                                                     return;
                                                 } else {
                                                     const relatedAchievements = results;
@@ -222,7 +228,7 @@ router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
                                                             // go through achievements related to the subject we just completed
                                                             pool.query('SELECT * FROM student_achievement WHERE achievement_id = (?) and user_id = (?)', [achievementId, userId], function callback(error, results, fields) {
                                                                 if (error != null) {
-                                                                    console.log(error);
+                                                                    console.error(error);
                                                                     return;
                                                                 } else {
                                                                     // if there is no entry for this achievement yet, add it
@@ -230,7 +236,7 @@ router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
                                                                     if (results.length == 0) {
                                                                         pool.query('INSERT INTO student_achievement (user_id, achievement_id, value_actual, value_goal) VALUES(?,?,?,?)', [userId, achievementId, 1, achievementValueGoal], function callback(error, results, fields) {
                                                                             if (error != null) {
-                                                                                console.log(error);
+                                                                                console.error(error);
                                                                                 return;
                                                                             } else {
                                                                                 // do nothing after update, let the loop continue to update any other related acheivements
@@ -247,7 +253,7 @@ router.post('/subjects/quizzes/:quizId/test/updategrades', function (req, res) {
                                                                             // UPDATE quiz SET average = (SELECT AVG(grade_value) FROM student_grade WHERE quiz_id = (?)), total_attempts = (total_attempts + 1)", [quizId],
                                                                             pool.query('UPDATE student_achievement SET value_actual = (value_actual + 1) WHERE achievement_id = (?) AND user_id = (?)', [achievementId, userId], function callback(error, results, fields) {
                                                                                 if (error != null) {
-                                                                                    console.log(error);
+                                                                                    console.error(error);
                                                                                     return;
                                                                                 } else {
                                                                                     // do nothing after update, let the loop continue to update any other related acheivements

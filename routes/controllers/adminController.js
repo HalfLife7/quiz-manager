@@ -12,7 +12,8 @@ function checkLogin(req, res, next) {
         res.locals.homepageActive = "inactive";
         res.locals.leaderboardActive = "inactive";
         res.locals.manageQuizzesActive = "inactive";
-        res.locals.statisticsActive = "active";
+        res.locals.statisticsActive = "inactive";
+        res.locals.adminPanelActive = "active";
         next();
     }
 
@@ -57,33 +58,17 @@ var pool = mysql.createPool({
 });
 
 /**
- * route for user statistics
+ * route for admin panel
  */
 router.get('/userstatistics', function (req, res) {
-    pool.query('SELECT user.user_id, user.first_name, user.last_name, user.nickname, user.achievement_points, user.last_date_active, student_grade.average_grade from user LEFT OUTER JOIN (SELECT user_id, ROUND(AVG(percent_value),2) AS average_grade FROM student_grade GROUP BY user_id) student_grade ON user.user_id = student_grade.user_id WHERE account_type = (?)', ["student"], function callback(error, results, fields) {
+    pool.query('SELECT user_id, email, first_name, last_name, account_type, last_date_active FROM user', function callback(error, results, fields) {
         if (error != null) {
             console.error(error);
             return;
         } else {
             userData = results;
             console.log(userData);
-            res.render('userstatistics', { userData: userData });
-        }
-    })
-})
-
-/**
- * route for quiz statistics
- */
-router.get('/quizstatistics', function (req, res) {
-    pool.query('SELECT quiz.*, subject.name AS subject_name FROM quiz JOIN subject ON quiz.subject_id = subject.subject_id', function callback(error, results, fields) {
-        if (error != null) {
-            console.error(error);
-            return;
-        } else {
-            quizData = results;
-            console.log(quizData);
-            res.render('quizstatistics', { quizData: quizData });
+            res.render('adminpanel', { userData: userData });
         }
     })
 })

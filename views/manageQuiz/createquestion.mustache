@@ -17,7 +17,7 @@
 <form id="createQuizForm" method="post" action="/manage/quizzes/{{quizData.quiz_id}}/question/create">
     <div class="form-group">
         <label for="name">Quiz Name</label>
-        <input requiredtype="text" class="form-control" disabled name="name" id="name" placeholder="Quiz Name"
+        <input required type="text" class="form-control" disabled name="name" id="name" placeholder="Quiz Name"
             value="{{quizData.name}}">
     </div>
     <div class="form-group">
@@ -29,7 +29,7 @@
     </div>
     <div class="form-group">
         <label for="questionText">Text</label>
-        <textarea class="form-control" name="questionText" id="questionText" placeholder="Question Text"
+        <textarea required class="form-control" name="questionText" id="questionText" placeholder="Question Text"
             rows="3"></textarea>
     </div>
     <h2>Answers</h2>
@@ -37,44 +37,44 @@
         <div class="form-row">
             <div class="form-group col-md-9 form-group">
                 <label class="sr-only" for="answerText1">Answer 1 Text</label>
-                <input requiredtype="text" name="answerText1" class="form-control" id="answerText1"
+                <input required type="text" name="answerText1" class="form-control" id="answerText1"
                     placeholder="Answer 1 Text">
             </div>
             <div class="custom-control custom-radio form-group">
-                <input requiredtype="radio" id="isCorrect1" value="isCorrect1" name="isCorrect" class="custom-control-input">
+                <input required type="radio" id="isCorrect1" value="isCorrect1" name="isCorrect" class="custom-control-input">
                 <label class="custom-control-label" for="isCorrect1">Correct?</label>
             </div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-9 form-group">
                 <label class="sr-only" for="answerText2">Answer 2 Text</label>
-                <input requiredtype="text" name="answerText2" class="form-control" id="answerText2"
+                <input required type="text" name="answerText2" class="form-control" id="answerText2"
                     placeholder="Answer 2 Text">
             </div>
             <div class="custom-control custom-radio form-group">
-                <input requiredtype="radio" id="isCorrect2" value="isCorrect2" name="isCorrect" class="custom-control-input">
+                <input required type="radio" id="isCorrect2" value="isCorrect2" name="isCorrect" class="custom-control-input">
                 <label class="custom-control-label" for="isCorrect2">Correct?</label>
             </div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-9 form-group">
                 <label class="sr-only" for="answerText3">Answer 3 Text</label>
-                <input requiredtype="text" name="answerText3" class="form-control" id="answerText3"
+                <input required type="text" name="answerText3" class="form-control" id="answerText3"
                     placeholder="Answer 3 Text">
             </div>
             <div class="custom-control custom-radio form-group">
-                <input requiredtype="radio" id="isCorrect3" value="isCorrect3" name="isCorrect" class="custom-control-input">
+                <input required type="radio" id="isCorrect3" value="isCorrect3" name="isCorrect" class="custom-control-input">
                 <label class="custom-control-label" for="isCorrect3">Correct?</label>
             </div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-9 form-group">
                 <label class="sr-only" for="answerText4">Answer 4 Text</label>
-                <input requiredtype="text" name="answerText4" class="form-control" id="answerText4"
+                <input required type="text" name="answerText4" class="form-control" id="answerText4"
                     placeholder="Answer 4 Text">
             </div>
             <div class="custom-control custom-radio form-group">
-                <input requiredtype="radio" id="isCorrect4" value="isCorrect4"  name="isCorrect" class="custom-control-input">
+                <input required type="radio" id="isCorrect4" value="isCorrect4"  name="isCorrect" class="custom-control-input">
                 <label class="custom-control-label" for="isCorrect4">Correct?</label>
             </div>
         </div>
@@ -105,10 +105,10 @@
                     formRow.push('<div class="form-row">');
                     formRow.push('<div class="form-group col-md-9 form-group">');
                     formRow.push('<label class="sr-only" for="answerText' + i + '"> Answer ' + i + ' Text</label>');
-                    formRow.push('<input requiredtype="text" name="answerText' + i + '" class="form-control" id="answerText' + i + '" placeholder="Answer ' + i + ' Text">');
+                    formRow.push('<input required type="text" name="answerText' + i + '" class="form-control" id="answerText' + i + '" placeholder="Answer ' + i + ' Text">');
                     formRow.push('</div>');
                     formRow.push('<div class="custom-control custom-radio form-group">');
-                    formRow.push('<input requiredtype="radio" id="isCorrect' + i + '" value="isCorrect' + i + '" name="isCorrect" class="custom-control-input">')
+                    formRow.push('<input required type="radio" id="isCorrect' + i + '" value="isCorrect' + i + '" name="isCorrect" class="custom-control-input">')
                     formRow.push('<label class="custom-control-label" for="isCorrect' + i + '">Correct?</label>')
                     formRow.push('</div>');
                     formRow.push('</div>');
@@ -125,10 +125,10 @@
                     formRow.push('<div class="form-row">');
                     formRow.push('<div class="form-group col-md-9 form-group">');
                     formRow.push('<label class="sr-only" for="answerText' + i + '"> Answer ' + i + ' Text</label>');
-                    formRow.push('<input requiredtype="text" readonly name="answerText' + i + '" class="form-control" id="answerText' + i + '" placeholder="Answer ' + i + ' Text">');
+                    formRow.push('<input required type="text" readonly name="answerText' + i + '" class="form-control" id="answerText' + i + '" placeholder="Answer ' + i + ' Text">');
                     formRow.push('</div>');
                     formRow.push('<div class="custom-control custom-radio form-group">');
-                    formRow.push('<input requiredtype="radio" id="isCorrect' + i + '" value="isCorrect' + i + '" name="isCorrect" class="custom-control-input">')
+                    formRow.push('<input required type="radio" id="isCorrect' + i + '" value="isCorrect' + i + '" name="isCorrect" class="custom-control-input">')
                     formRow.push('<label class="custom-control-label" for="isCorrect' + i + '">Correct?</label>')
                     formRow.push('</div>');
                     formRow.push('</div>');

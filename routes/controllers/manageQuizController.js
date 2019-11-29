@@ -65,7 +65,8 @@ router.get('/manage/quizzes', function (req, res) {
 
     pool.query("SELECT quiz.*, subject.name as subject_name FROM quiz JOIN subject ON quiz.subject_id = subject.subject_id", function callback(error, results, fields) {
         if (error != null) {
-            // console.log(error);
+            console.error(error);
+            return;
         } else {
             const allQuizData = results;
             res.render('managequizzes', { allQuizData: allQuizData, notification: notification });
@@ -80,7 +81,8 @@ router.get('/manage/quizzes/create', function (req, res) {
     // get all subjects to fill field
     pool.query("SELECT * FROM subject", function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             const subjectData = results;
             res.render('createquiz', { subjectData: subjectData });
@@ -95,7 +97,8 @@ router.post('/manage/quizzes/create', function (req, res) {
     // console.log(req.body);
     pool.query("INSERT INTO quiz (name, description, subject_id, class, total_questions) VALUES (?,?,(SELECT subject_id FROM subject WHERE name = ?),?, 0)", [req.body.name, req.body.description, req.body.subject, req.body.class], function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             req.session.notification = { headerText: "Create Quiz", messageText: "Successfully created quiz!", buttonText: "Okay" }
             res.redirect('/manage/quizzes');
@@ -111,25 +114,42 @@ router.get('/manage/quizzes/:id', function (req, res) {
     req.session.notification = "";
 
     const quizId = req.params.id;
-    pool.query("SELECT * FROM quiz where quiz_id = ?", quizId, function callback(error, results, fields) {
+    pool.query("SELECT quiz.*, subject.name AS subject_name FROM quiz JOIN subject ON quiz.subject_id = subject.subject_id WHERE quiz_id = ?", quizId, function callback(error, results, fields) {
         if (error != null) {
-            // console.log(error);
+            console.error(error);
+            return;
         } else {
             // console.log(results[0]);
             const quizData = results[0];
 
             pool.query("SELECT * FROM question where quiz_id = ?", quizId, function callback(error, results, fields) {
                 if (error != null) {
-                    // console.log(error);
+                    console.error(error);
+                    return;
                 } else {
                     // console.log(results);
                     const quizQuestionsData = results;
 
                     pool.query("SELECT * FROM subject", function callback(error, results, fields) {
                         if (error != null) {
-                            console.log(error);
+                            console.error(error);
+                            return;
                         } else {
-                            const subjectData = results;
+                            // https://stackoverflow.com/questions/44932502/change-elements-positions-in-an-array-and-shift-elements-in-between
+                            function insertAndShift(arr, from, to) {
+                                let cutOut = arr.splice(from, 1) [0]; // cut the element at index 'from'
+                                arr.splice(to, 0, cutOut);            // insert it at index 'to'
+                            }
+                            
+                            let subjectData = results;
+
+                            // change order to set correct subject data as first item in the dropdown list
+                            for (i = subjectData.length - 1 ; i > 0; i--) {
+
+                                if (subjectData[i].name == quizData.subject_name) {
+                                    insertAndShift(subjectData, i, 0);
+                                }
+                            }
                             res.render('editquiz', { quizData: quizData, quizQuestionsData: quizQuestionsData, notification: notification, subjectData: subjectData });
                         }
                     })
@@ -150,7 +170,8 @@ router.post('/manage/quizzes/:id/edit', function (req, res) {
     const quizId = req.params.id;
     pool.query("UPDATE quiz SET name = (?), description = (?), class = (?), total_questions = (SELECT COUNT(quiz_id) FROM question WHERE quiz_id = ?) WHERE quiz_id = (?)", [req.body.name, req.body.description, req.body.class, quizId, quizId], function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             // console.log(results[0]);
             // reload the page with the updated quiz
@@ -168,7 +189,8 @@ router.delete('/manage/quizzes/:id/delete', function (req,res) {
     console.log(req.params.id);
     pool.query("DELETE FROM quiz WHERE quiz_id = (?)", [quizId], function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             // console.log(results);
             res.send("success");

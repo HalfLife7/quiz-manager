@@ -36,8 +36,8 @@ router.use(checkAccountType);
 
 // mysql
 var mysql = require('mysql');
-var pool  = mysql.createPool({
-  connectionLimit : 99,
+var pool = mysql.createPool({
+    connectionLimit: 99,
     host: 'localhost',
     user: 'root',
     password: 'admin',
@@ -57,7 +57,8 @@ router.get('/account/profile/:userId', function (req, res) {
     const userId = req.params.userId;
     pool.query('SELECT * FROM user WHERE user_id = (?)', userId, function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             const userData = results[0];
             res.render('userprofile', { userData: userData, notification: notification });
@@ -119,7 +120,8 @@ router.post('/account/profile/:userId/update', function (req, res) {
                 console.log(req.body);
                 pool.query("UPDATE user SET nickname = (?), program = (?), school = (?) WHERE user_id = (?)", [req.body.nickname, req.body.program, req.body.school, userId], function callback(error, results, fields) {
                     if (error != null) {
-                        console.log(error);
+                        console.error(error);
+                        return;
                     } else {
                         // still update the form if other fields were changed
                         req.session.notification = { headerText: "Update Profile", messageText: "Successfully updated profile!", buttonText: "Okay", type: "btn-success" }
@@ -133,8 +135,10 @@ router.post('/account/profile/:userId/update', function (req, res) {
                 // req.file.filename
                 pool.query("UPDATE user SET nickname = (?), program = (?), school = (?), profile_picture_path = (?) WHERE user_id = (?)", [req.body.nickname, req.body.program, req.body.school, profileImagePath, userId], function callback(error, results, fields) {
                     if (error != null) {
-                        console.log(error);
+                        console.error(error);
+                        return;
                     } else {
+                        req.session.userInfo.profilePicturePath = profileImagePath;
                         req.session.notification = { headerText: "Update Profile", messageText: "Successfully updated profile!", buttonText: "Okay", type: "btn-success" }
                         return res.redirect('/account/profile/' + userId);
                     }
@@ -157,7 +161,8 @@ router.get('/account/settings/:userId', function (req, res) {
     const userId = req.params.userId;
     pool.query('SELECT * FROM user WHERE user_id = (?)', userId, function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             const userData = results[0];
 
@@ -195,7 +200,8 @@ router.post('/account/settings/:userId/updatesettings', function (req, res) {
 
     pool.query("UPDATE user SET leaderboard_opt_in = (?), leaderboard_use_nickname = (?) WHERE user_id = (?)", [optIn, useNickname, userId], function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             req.session.notification = { headerText: "Update Settings", messageText: "Successfully updated user settings!", buttonText: "Okay", type: "btn-success" }
             res.redirect('/account/settings/' + userId);
@@ -216,10 +222,11 @@ router.post('/account/settings/:userId/updatepassword', function (req, res) {
     // check if current password is correct
     pool.query("SELECT * FROM user WHERE user_id = (?)", [userId], function callback(error, results, fields) {
         if (error != null) {
-            console.log(error);
+            console.error(error);
+            return;
         } else {
             var hashedPassword = results[0].password;
-            
+
             if (passwordHash.verify(currentPassword, hashedPassword) == true) {
                 // password is correct - check if the new passwords match
                 if (newPassword == confirmPassword) {
@@ -229,7 +236,8 @@ router.post('/account/settings/:userId/updatepassword', function (req, res) {
                     // update the password
                     pool.query('UPDATE user SET password = (?) WHERE user_id = (?)', [hashedNewPassword, userId], function callback(error, results, fields) {
                         if (error != null) {
-                            console.log(null);
+                            console.error(error);
+                            return;
                         } else {
                             req.session.notification = { headerText: "Update Password", messageText: "Successfully updated password!", buttonText: "Okay", type: "btn-success" }
                             res.redirect('/account/settings/' + userId);

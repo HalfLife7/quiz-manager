@@ -1,0 +1,45 @@
+{{>header}}
+{{#student}}
+{{>navigationbarstudent}}
+{{/student}}
+{{#teacher}}
+{{>navigationbarteacher}}
+{{/teacher}}
+{{#admin}}
+{{>navigationbaradmin}}
+{{/admin}}
+
+<main class="container" role="main">
+<h1 class="mt-5 pt-5">Admin Panel</h1>
+<button class="btn btn-primary mb-2" type="submit" form="adminPanelForm">Update Users</button>
+<form id="createQuizForm" method="post" action="/adminpanel/update">
+{{#userData}}
+  <div class="form-row">
+    <div class="form-group col-md-4">
+      <label class="sr-only" for="email">Email</label>
+      <input type="text" class="form-control" id="email">
+    </div>
+        <div class="form-group col-md-3">
+      <label class="sr-only" for="firstName">First Name</label>
+      <input type="text" class="form-control" id="firstName">
+    </div>
+        <div class="form-group col-md-3">
+      <label class="sr-only" for="lastName">Last Name</label>
+      <input type="text" class="form-control" id="lastName">
+    </div>
+    <div class="form-group col-md-2">
+      <label class="sr-only" for="accountType">Account Type</label>
+      <select id="accountType" class="form-control">
+        <option selected>Choose...</option>
+        <option>...</option>
+      </select>
+    </div>
+
+  </div>
+  {{/userData}}
+</form>
+</main>
+
+
+{{>scripts}}
+{{>footer}}
