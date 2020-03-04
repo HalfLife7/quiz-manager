@@ -123,7 +123,8 @@ router.post('/registeruser', function (req, res) {
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
                 accountType: "student",
-                userId: results[0]
+                userId: results[0],
+                profilePicturePath: ""
               }
             console.log(req.session);
             // redirect to student homepage for logged-in students

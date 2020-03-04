@@ -72,7 +72,7 @@ const storage = multer.diskStorage({
     destination: './public/images/profilepictures',
     // set name for file upload
     filename: function (req, file, callback) {
-        callback(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+        callback(null, file.fieldname.toLowerCase() + '-' + Date.now() + path.extname(file.originalname).toLowerCase());
     }
 });
 

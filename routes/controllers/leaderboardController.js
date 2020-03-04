@@ -81,8 +81,24 @@ router.get('/leaderboard', function (req, res) {
             res.render('leaderboard', { userData: userData });
         }
     })
-
 })
+
+// router.get('/leaderboard/images', function (req, res) {
+//     pool.query('SELECT profile_picture_path FROM user WHERE account_type = (?) AND  leaderboard_opt_in = (?) ORDER BY achievement_points DESC', ["student", "true"], function callback(error, results, fields) {
+//         if (error != null) {
+//             console.error(error);
+//             return;
+//         } else {
+//             const userProfileImages = results;
+
+//             // for (i = 0; i < userProfileImages.length; i++) {
+//             //     userProfileImages[i]["profilePictureNumber"] = i + 1;
+//             // }
+
+//             res.send(JSON.stringify(userProfileImages));
+//         }
+//     })
+// })
 
 // export these routes up to routes.js
 module.exports = router;

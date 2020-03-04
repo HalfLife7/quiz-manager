@@ -56,7 +56,12 @@ app.use(express.urlencoded({
 }));
 
 // set image path
-app.use(express.static(__dirname + '/public'));
+// app.use(express.static('/css'));
+// app.use(express.static('/images/badges'));
+// app.use(express.static('/badges/profilepictures'));
+// app.use(express.static('/js'));
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 // set view paths
 const viewsPath = path.join(__dirname, '/views');
@@ -86,6 +91,6 @@ var routes = require("./routes/routes.js");
 app.use('/', routes);
 
 
-var server = app.listen(3000, function () {
+var server = app.listen(8080, '10.0.0.4', function () {
   console.log("Server listening...");
 })
