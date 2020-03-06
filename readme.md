@@ -18,5 +18,5 @@ Quiz Manager will use be developed with the following technologies:
 | Database | MySQL |
 | Source Control | GitHub |
 | Testing | Selenium |
-| Browsers | ChromeFirefox |
+| Browsers | Chrome, Firefox |
 | IDE | VS Code |
