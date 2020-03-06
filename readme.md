@@ -12,7 +12,7 @@ Quiz Manager will use be developed with the following technologies:
 
 | Usage | Technology |
 | --- | --- |
-| Front-end | HTML5CSSJavaScript / jQueryBootstrap |
+| Front-end | HTML5, CSS3, JavaScript, QueryBootstrap |
 | Backend | Node, Express |
 | Templating | mustache.js |
 | Database | MySQL |
